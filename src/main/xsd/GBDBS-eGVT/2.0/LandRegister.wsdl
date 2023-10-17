@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<definitions name="LandRegisterSvc"
+          targetNamespace="http://schemas.terravis.ch/LandRegisterSvc/2.0"
+          xmlns:tns="http://schemas.terravis.ch/LandRegisterSvc/2.0"
+          xmlns:ver="http://schemas.terravis.ch/Versioning/1.0"
+          xmlns:usr="http://schemas.terravis.ch/GBDBS-eGVT/2.0"
+	  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+          xmlns="http://schemas.xmlsoap.org/wsdl/">
+<!-- version 2.0.5 -->
+    <types>
+    	<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	   <xsd:import namespace="http://schemas.terravis.ch/Versioning/1.0"
+		   schemaLocation="../../Versioning/1.0/Versioning.xsd"/>
+	   <xsd:import namespace="http://schemas.terravis.ch/GBDBS-eGVT/2.0"
+		   schemaLocation="../../GBDBS-eGVT/2.0/GBDBS-eGVT.xsd"/>
+    	</xsd:schema>
+    </types>
+    
+	<message name="requestRegistrationInput">
+		<part name="parameters" element="usr:RequestRegistration"/>
+	</message>
+	
+	<message name="deliverRegistrationDetailsInput">
+		<part name="parameters" element="usr:DeliverRegistrationDetails"/>
+	</message>
+	
+	<message name="GetVersionsInput">
+		<part name="parameters" element="ver:GetVersions"/>
+	</message>
+	
+	<message name="GetVersionsOutput">
+		<part name="parameters" element="ver:GetVersionsResponse"/>
+	</message>
+
+	
+
+	<portType name="LandRegisterPortType">
+
+		<operation name="requestRegistration">
+			<input message="tns:requestRegistrationInput"/>
+		</operation>
+
+		<operation name="deliverRegistrationDetails">
+			<input message="tns:deliverRegistrationDetailsInput"/>
+		</operation>
+
+		<operation name="GetVersions">
+			<input message="tns:GetVersionsInput"/>
+			<output message="tns:GetVersionsOutput"/>
+		</operation>
+	
+	</portType>
+
+	
+
+    <binding name="LandRegisterSoapHttpBinding" type="tns:LandRegisterPortType">
+
+		<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+		<operation name="requestRegistration">
+			<soap:operation soapAction="http://schemas.terravis.ch/LandRegisterSvc/2.0/requestRegistration" style="document"/>
+			<input>
+				<soap:body use="literal" />
+			</input>
+		</operation>
+
+		<operation name="deliverRegistrationDetails">
+			<soap:operation soapAction="http://schemas.terravis.ch/LandRegisterSvc/2.0/deliverRegistrationDetails" style="document"/>
+			<input>
+				<soap:body use="literal" />
+			</input>
+		</operation>
+		
+		<operation name="GetVersions">
+			<soap:operation soapAction="http://schemas.terravis.ch/LandRegisterSvc/1.0/GetVersions" style="document"/>
+			<input>
+				<soap:body use="literal" />
+			</input>
+			<output>
+				<soap:body use="literal" />
+			</output>
+		</operation>
+
+    </binding>
+
+</definitions>

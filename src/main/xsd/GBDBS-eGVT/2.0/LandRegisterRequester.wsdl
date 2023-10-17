@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<definitions name="LandRegisterRequesterSvc"
+          targetNamespace="http://schemas.terravis.ch/LandRegisterRequesterSvc/2.0"
+          xmlns:tns="http://schemas.terravis.ch/LandRegisterRequesterSvc/2.0"
+          xmlns:ver="http://schemas.terravis.ch/Versioning/1.0"
+          xmlns:usr="http://schemas.terravis.ch/GBDBS-eGVT/2.0"
+	  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+          xmlns="http://schemas.xmlsoap.org/wsdl/">
+<!-- version 2.0.5 -->
+    <types>
+    	<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	   <xsd:import namespace="http://schemas.terravis.ch/Versioning/1.0"
+		   schemaLocation="../../Versioning/1.0/Versioning.xsd"/>
+	   <xsd:import namespace="http://schemas.terravis.ch/GBDBS-eGVT/2.0"
+		   schemaLocation="../../GBDBS-eGVT/2.0/GBDBS-eGVT.xsd"/>
+    	</xsd:schema>
+    </types>
+	<message name="notifyRegistrationInput">
+		<part name="parameters" element="usr:NotifyRegistration"/>
+	</message>
+
+	<message name="notifyRejectionInput">
+		<part name="parameters" element="usr:NotifyRejection"/>
+	</message>
+	
+	<message name="notifyJournalEntryInput">
+		<part name="parameters" element="usr:NotifyJournalEntry"/>
+	</message>
+
+	<message name="notifyJournalEntryRefusalInput">
+		<part name="parameters" element="usr:NotifyJournalEntryRefusal"/>
+	</message>
+
+	<message name="GetVersionsInput">
+		<part name="parameters" element="ver:GetVersions"/>
+	</message>
+	
+	<message name="GetVersionsOutput">
+		<part name="parameters" element="ver:GetVersionsResponse"/>
+	</message>
+
+	<portType name="LandRegisterRequesterPortType">
+
+		<operation name="notifyRegistration">
+			<input message="tns:notifyRegistrationInput"/>
+		</operation>
+
+		<operation name="notifyRejection">
+			<input message="tns:notifyRejectionInput"/>
+		</operation>
+
+		<operation name="notifyJournalEntry">
+			<input message="tns:notifyJournalEntryInput"/>
+		</operation>
+		
+		<operation name="notifyJournalEntryRefusal">
+			<input message="tns:notifyJournalEntryRefusalInput"/>
+		</operation>
+		
+		<operation name="GetVersions">
+			<input message="tns:GetVersionsInput"/>
+			<output message="tns:GetVersionsOutput"/>
+		</operation>
+
+    </portType>
+
+	
+
+    <binding name="LandRegisterRequesterSoapHttpBinding" type="tns:LandRegisterRequesterPortType">
+
+		<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+		<operation name="notifyRegistration">
+			<soap:operation soapAction="http://schemas.terravis.ch/LandRegisterRequesterSvc/2.0/notifyRegistration" style="document"/>
+			<input>
+				<soap:body use="literal" />
+			</input>
+		</operation>
+
+		<operation name="notifyRejection">
+			<soap:operation soapAction="http://schemas.terravis.ch/LandRegisterRequesterSvc/2.0/notifyRejection" style="document"/>
+			<input>
+				<soap:body use="literal" />
+			</input>
+		</operation>
+
+		<operation name="notifyJournalEntry">
+			<soap:operation soapAction="http://schemas.terravis.ch/LandRegisterRequesterSvc/2.0/notifyJournalEntry" style="document"/>
+			<input>
+				<soap:body use="literal" />
+			</input>
+		</operation>
+		
+		<operation name="notifyJournalEntryRefusal">
+			<soap:operation soapAction="http://schemas.terravis.ch/LandRegisterRequesterSvc/2.0/notifyJournalEntryRefusal" style="document"/>
+			<input>
+				<soap:body use="literal" />
+			</input>
+		</operation>
+		
+		<operation name="GetVersions">
+			<soap:operation soapAction="http://schemas.terravis.ch/LandRegisterRequesterSvc/1.0/GetVersions" style="document"/>
+			<input>
+				<soap:body use="literal" />
+			</input>
+			<output>
+				<soap:body use="literal" />
+			</output>
+		</operation>
+
+    </binding>
+
+</definitions>

@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<definitions name="GBDBSSvcSample"
+
+targetNamespace="http://schemas.terravis.ch/GBDBSSvcSample/2.0"
+          xmlns:tns="http://schemas.terravis.ch/GBDBSSvcSample/2.0"
+          xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+          xmlns:defs="http://schemas.terravis.ch/GBDBSSvc/2.0"
+          xmlns:defs2="http://schemas.terravis.ch/LandRegisterRequesterSvc/2.0"
+          xmlns:defs3="http://schemas.terravis.ch/LandRegisterSvc/2.0"
+          xmlns:defsext1="http://schemas.terravis.ch/GBDBSSvc/2.0/ext1"
+          xmlns="http://schemas.xmlsoap.org/wsdl/">
+
+   <import namespace="http://schemas.terravis.ch/GBDBSSvc/2.0"
+           location="gbdbs.wsdl"/>
+    <import namespace="http://schemas.terravis.ch/LandRegisterRequesterSvc/2.0"
+        location="../../GBDBS-eGVT/2.0/LandRegisterRequester.wsdl"/>
+    <import namespace="http://schemas.terravis.ch/LandRegisterSvc/2.0"
+        location="../../GBDBS-eGVT/2.0/LandRegister.wsdl"/>
+    <import namespace="http://schemas.terravis.ch/GBDBSSvc/2.0/ext1"
+        location="gbdbsext1.wsdl"/>
+    
+
+    <service name="SampleGBDBSServiceInstance">
+        <port name="ParcelServicePort" binding="defs:ParcelServiceSoapHttpBinding">
+           <soap:address location="http://example.com/GBDBSSvcSoap/2.0"/>
+        </port>
+        <port name="LandRegisterRequesterPort" binding="defs2:LandRegisterRequesterSoapHttpBinding">
+            <soap:address location="http://example.com/LandRegisterRequesterSvcSoap/2.0"/>
+        </port>
+        <port name="LandRegisterPort" binding="defs3:LandRegisterSoapHttpBinding">
+            <soap:address location="http://example.com/LandRegisterSvcSoap/2.0"/>
+        </port>
+        <port name="ParcelServiceExt1Port" binding="defsext1:ParcelServiceExt1SoapHttpBinding">
+            <soap:address location="http://example.com/GBDBSSvcSoap/2.0/ext1"/>
+        </port>
+    </service>
+</definitions>
+

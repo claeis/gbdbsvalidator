@@ -1,0 +1,12 @@
+<bindings xmlns="http://java.sun.com/xml/ns/jaxb" version="2.1" 
+        xmlns:GBDBS-Datei="http://schemas.geo.admin.ch/BJ/TGBV/GBDBS-Datei/2.1" 
+  >
+ <bindings scd="x-schema::GBDBS-Datei"> 
+   <schemaBindings>
+      <package name="ch.ehi.gbdbsvalidator.jaxb.gbdbsdatei._2_1"/>
+      <!-- nameXmlTransform>
+        <typeName suffix="Type"/>
+      </nameXmlTransform -->
+    </schemaBindings>
+ </bindings>
+</bindings>

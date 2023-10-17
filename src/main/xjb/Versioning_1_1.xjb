@@ -1,0 +1,12 @@
+<bindings xmlns="http://java.sun.com/xml/ns/jaxb" version="2.1" 
+	xmlns:ver-11="http://schemas.terravis.ch/Versioning/1.1" 
+  >
+
+<bindings scd="x-schema::ver-11"> 
+   <schemaBindings>
+      <package name="ch.ehi.gbdbsvalidator.jaxb.versioning._1_1"/>
+    </schemaBindings>
+ </bindings>
+ 
+</bindings>
+

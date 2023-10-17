@@ -1,0 +1,9 @@
+<bindings xmlns="http://java.sun.com/xml/ns/jaxb" version="2.1" 
+        xmlns:ValidationResult-1-0="http://schemas.bfs.admin.ch/ValidationResult/1.0" 
+  >
+ <bindings scd="x-schema::ValidationResult-1-0"> 
+   <schemaBindings>
+      <package name="ch.ehi.gbdbsvalidator.jaxb.validationresult._1_0"/>
+    </schemaBindings>
+ </bindings>
+</bindings>

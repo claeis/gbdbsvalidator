@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns34:GBDBS xmlns:xmime="http://www.w3.org/2005/05/xmlmime" 
+xmlns:ns20="http://schemas.geo.admin.ch/BJ/TGBV/GBBasisTypen/2.1" xmlns:ns21="http://www.ech.ch/xmlns/eCH-0007/6" 
+xmlns:ns34="http://schemas.geo.admin.ch/BJ/TGBV/GBDBS-Datei/2.1" >
+	<ns34:HEADERSECTION/>
+	<ns34:DATASECTION>
+		<ns34:Vollbestand>
+		<ns20:Liegenschaft>
+			<ns20:Nummer>CH887722167773:11::test:</ns20:Nummer>
+			<ns20:istKopie>false</ns20:istKopie>
+			<ns20:InhaltLiegenschaft>
+				<ns20:Flaechenmass>999</ns20:Flaechenmass>
+			</ns20:InhaltLiegenschaft>
+			<ns20:Flurname>
+				<ns20:Name>Testzone</ns20:Name>
+			</ns20:Flurname>
+			<ns20:Flurname>
+				<ns20:Name>read-only</ns20:Name>
+			</ns20:Flurname>
+			<ns20:GBPlan>
+				<ns20:Nummer>26</ns20:Nummer>
+			</ns20:GBPlan>
+			<ns20:Gemeinde>
+				<ns21:municipalityId>9901</ns21:municipalityId>
+				<ns21:municipalityName>Testdorf</ns21:municipalityName>
+			</ns20:Gemeinde>
+			<ns20:GBAmt>
+				<ns20:Name>Test GB-Amt</ns20:Name>
+			</ns20:GBAmt>
+			<ns20:Gebaeude>
+				<ns20:Nummer>981</ns20:Nummer>
+			</ns20:Gebaeude>
+			<ns20:Bodenbedeckung>
+				<ns20:ArtBezeichnung>Gartenanlage</ns20:ArtBezeichnung>
+			</ns20:Bodenbedeckung>
+		</ns20:Liegenschaft>
+		<ns20:NatuerlichePersonGB>
+			<ns20:Nummer>CH792277771621::::</ns20:Nummer>
+			<ns20:InhaltNatuerlichePersonGB>
+				<ns20:Name>Müller</ns20:Name>
+				<ns20:Vornamen>Ulrich Walter</ns20:Vornamen>
+				<ns20:Geburtsjahr>1949</ns20:Geburtsjahr>
+				<ns20:Geburtsmonat>12</ns20:Geburtsmonat>
+				<ns20:Geburtstag>13</ns20:Geburtstag>
+				<ns20:Geschlecht>maennlich</ns20:Geschlecht>
+				<ns20:Heimatort>Trubschachen</ns20:Heimatort>
+				<ns20:Staatsangehoerigkeit>Testland</ns20:Staatsangehoerigkeit>
+			</ns20:InhaltNatuerlichePersonGB>
+			<ns20:NatuerlichePerson>
+				<ns20:Name>Müller</ns20:Name>
+				<ns20:Adresse>
+					<ns20:Strasse>Bahnhofsplatz</ns20:Strasse>
+					<ns20:Hausnummer>1</ns20:Hausnummer>
+					<ns20:PLZ>8000</ns20:PLZ>
+					<ns20:Ort>Zürich</ns20:Ort>
+					<ns20:Land>Testland</ns20:Land>
+					<ns20:GWR_EGID>1</ns20:GWR_EGID>
+					<ns20:GWR_EDID>1</ns20:GWR_EDID>
+					<ns20:Rolle>Wohnadresse</ns20:Rolle>
+				</ns20:Adresse>
+				<ns20:Vornamen>Ulrich Walter</ns20:Vornamen>
+				<ns20:Geburtsjahr>1949</ns20:Geburtsjahr>
+				<ns20:Geburtsmonat>12</ns20:Geburtsmonat>
+				<ns20:Geburtstag>13</ns20:Geburtstag>
+				<ns20:Zivilstand>ledig</ns20:Zivilstand>
+				<ns20:LedigerName>Obertester</ns20:LedigerName>
+				<ns20:Rufname>Ueli</ns20:Rufname>
+				<ns20:Buergerort>Trubschachen</ns20:Buergerort>
+				<ns20:NameDerEltern>Meier</ns20:NameDerEltern>
+				<ns20:Geschlecht>maennlich</ns20:Geschlecht>
+				<ns20:EPID>756.1234.5678.97</ns20:EPID>
+			</ns20:NatuerlichePerson>
+		</ns20:NatuerlichePersonGB>
+		<ns20:EigentumAnteil>
+			<ns20:InhaltEigentumAnteil vonEGBTBID="CH97831229777" vonTagebuchNummer="lt.Katg" vonTagebuchDatumZeit="1919-07-01T00:00:01" vonIdx="1">
+				<ns20:istKopie>false</ns20:istKopie>
+				<ns20:AnteilZaehler>1</ns20:AnteilZaehler>
+				<ns20:AnteilNenner>1</ns20:AnteilNenner>
+				<ns20:SubjektivDinglich>false</ns20:SubjektivDinglich>
+				<ns20:Eigentumsform>AlleinEigentum</ns20:Eigentumsform>
+			</ns20:InhaltEigentumAnteil>
+			<ns20:Nummer>CH4955E1168::</ns20:Nummer>
+			<ns20:Berechtigte>CH792277771621::::</ns20:Berechtigte>
+			<ns20:belastetesGrundstueck>CH887722167773:11::test:</ns20:belastetesGrundstueck>
+			<ns20:Erwerbsgrund>
+				<ns20:ErwerbsartStichwort>
+					<ns20:Stichwort>Erbgang</ns20:Stichwort>
+					<ns20:uuid>1946A358-37B0-4640-B458-C0CAD7F25C2D</ns20:uuid>
+				</ns20:ErwerbsartStichwort>
+				<ns20:Datum>2010-06-28</ns20:Datum>
+				<ns20:TagebuchNummer>294</ns20:TagebuchNummer>
+			</ns20:Erwerbsgrund>
+		</ns20:EigentumAnteil>
+</ns34:Vollbestand>
+</ns34:DATASECTION>
+</ns34:GBDBS>

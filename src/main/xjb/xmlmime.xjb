@@ -1,0 +1,11 @@
+<bindings xmlns="http://java.sun.com/xml/ns/jaxb" version="2.1" 
+        xmlns:xmime="http://www.w3.org/2005/05/xmlmime" 
+  >
+ <bindings scd="x-schema::xmime"> 
+   <schemaBindings>
+      <package name="ch.ehi.gbdbsvalidator.jaxb.xmime._2005_05"/>
+    </schemaBindings>
+ </bindings>
+ 
+</bindings>
+

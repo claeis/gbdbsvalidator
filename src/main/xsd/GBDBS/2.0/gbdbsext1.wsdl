@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<definitions name="GBDBSSvc"
+
+targetNamespace="http://schemas.terravis.ch/GBDBSSvc/2.0/ext1"
+          xmlns:tns="http://schemas.terravis.ch/GBDBSSvc/2.0/ext1"
+          xmlns:gbdbs="http://schemas.terravis.ch/GBDBS/2.0"
+          xmlns:gbdbsext1="http://schemas.terravis.ch/GBDBS/2.0/ext1"
+          xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+          xmlns="http://schemas.xmlsoap.org/wsdl/">
+<!-- version 2.0.5 -->
+
+    <types>
+	   <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">      
+	       <xsd:import namespace="http://schemas.terravis.ch/GBDBS/2.0"
+	           schemaLocation="../../GBDBS/2.0/GBDBS.xsd"/>
+	       <xsd:import namespace="http://schemas.terravis.ch/GBDBS/2.0/ext1"
+	       schemaLocation="../../GBDBS/2.0/GBDBSExt1.xsd"/>
+	   </xsd:schema>
+    </types>
+
+    
+    <message name="GetPersonsInput">
+        <part name="p1" element="gbdbsext1:GetPersonsRequest"/>
+    </message>
+
+    <message name="GetPersonsOutput">
+        <part name="p1" element="gbdbsext1:GetPersonsResponse"/>
+    </message>
+
+    <message name="GetPersonsFault">
+        <part name="p1" element="gbdbs:Exception"/>
+    </message>
+    
+    <portType name="ParcelServiceExt1PortType">
+        <operation name="GetPersons">
+           <input message="tns:GetPersonsInput"/>
+           <output message="tns:GetPersonsOutput"/>
+           <fault name="GetPersonsFault" message="tns:GetPersonsFault"/>
+        </operation>
+    </portType>
+
+    <binding name="ParcelServiceExt1SoapHttpBinding" type="tns:ParcelServiceExt1PortType">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <operation name="GetPersons">
+           <soap:operation soapAction="http://schemas.terravis.ch/GBDBSSvc/2.0/ext1/GetPersons" style="document"/>
+           <input>
+               <soap:body use="literal" />
+           </input>
+           <output>
+               <soap:body use="literal" />
+           </output>
+           <fault name="GetPersonsFault">
+               <soap:fault name="GetPersonsFault" use="literal" />
+           </fault>
+        </operation>
+    </binding>
+    
+</definitions>
+

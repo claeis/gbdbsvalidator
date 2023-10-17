@@ -1,0 +1,11 @@
+<bindings xmlns="http://java.sun.com/xml/ns/jaxb" version="2.1" 
+        xmlns:terravisContact="http://schemas.terravis.ch/TerravisContact/1.0" 
+  >
+ <bindings scd="x-schema::terravisContact"> 
+   <schemaBindings>
+      <package name="ch.ehi.gbdbsvalidator.jaxb.terraviscontact._1_0"/>
+    </schemaBindings>
+ </bindings>
+ 
+</bindings>
+

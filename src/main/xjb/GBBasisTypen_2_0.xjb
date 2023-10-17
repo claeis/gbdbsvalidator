@@ -1,0 +1,23 @@
+<bindings xmlns="http://java.sun.com/xml/ns/jaxb" version="2.1" 
+        xmlns:GBBasisTypen="http://schemas.terravis.ch/GBBasisTypen/2.0" 
+  >
+ <bindings scd="x-schema::GBBasisTypen"> 
+   <schemaBindings>
+      <package name="ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_0"/>
+    </schemaBindings>
+ </bindings>
+  <bindings scd="/type::GBBasisTypen:ErwerbsgrundType//GBBasisTypen:Datum">
+    <property name="eg_Datum"/>
+  </bindings>
+  <bindings scd="/type::GBBasisTypen:ErwerbsgrundType//GBBasisTypen:TagebuchNummer">
+    <property name="eg_TagebuchNummer"/>
+  </bindings>
+  <bindings scd="/type::GBBasisTypen:ErwerbsgrundType//GBBasisTypen:EGBTBID">
+    <property name="eg_EGBTBID"/>
+  </bindings>
+  <bindings scd="/type::GBBasisTypen:ErwerbsgrundType//GBBasisTypen:Idx">
+    <property name="eg_Idx"/>
+  </bindings>
+ 
+</bindings>
+

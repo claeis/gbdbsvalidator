@@ -1,0 +1,11 @@
+<bindings xmlns="http://java.sun.com/xml/ns/jaxb" version="2.1" 
+        xmlns:xmlDSig="http://www.w3.org/2000/09/xmldsig#" 
+  >
+ <bindings scd="x-schema::xmlDSig"> 
+   <schemaBindings>
+      <package name="ch.ehi.gbdbsvalidator.jaxb.xmldsig._2000_09"/>
+    </schemaBindings>
+ </bindings>
+ 
+</bindings>
+

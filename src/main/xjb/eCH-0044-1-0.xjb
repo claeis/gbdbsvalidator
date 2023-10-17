@@ -1,0 +1,12 @@
+<bindings xmlns="http://java.sun.com/xml/ns/jaxb" version="2.1" 
+        xmlns:eCH-0044-1-0="http://www.ech.ch/xmlns/eCH-0044/1" 
+  >
+ <bindings scd="x-schema::eCH-0044-1-0"> 
+   <schemaBindings>
+      <package name="ch.ehi.gbdbsvalidator.jaxb.ech0044._1._0"/>
+      <nameXmlTransform>
+        <typeName suffix="Type"/>
+      </nameXmlTransform>
+    </schemaBindings>
+ </bindings>
+</bindings>

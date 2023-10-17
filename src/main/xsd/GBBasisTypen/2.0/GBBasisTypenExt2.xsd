@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xmlns="http://schemas.terravis.ch/GBBasisTypen/2.0/ext2"
+  xmlns:GbId="http://schemas.terravis.ch/GBBasisId/2.0"
+  xmlns:GBBasisTypen="http://schemas.terravis.ch/GBBasisTypen/2.0"
+  targetNamespace="http://schemas.terravis.ch/GBBasisTypen/2.0/ext2" elementFormDefault="qualified"
+  attributeFormDefault="unqualified" version="2.0.5">
+  <xsd:import namespace="http://schemas.terravis.ch/GBBasisId/2.0"
+    schemaLocation="../../GBBasisId/2.0/GBBasisId.xsd"/>
+  <xsd:import namespace="http://schemas.terravis.ch/GBBasisTypen/2.0" 
+    schemaLocation="../../GBBasisTypen/2.0/GBBasisTypen.xsd"/>
+
+  <xsd:attribute name="mitgliedSpezifischerErwerbsgrund" type="GbId:PersonId"/>
+  
+  <!-- 1:1 Kopien vom GBDBS 2.1 Schema -->
+  <xsd:simpleType name="TagebuchNummer">
+    <xsd:restriction base="xsd:normalizedString">
+      <xsd:maxLength value="20"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+  
+  <xsd:attribute name="bisTagebuchNummer" type="TagebuchNummer"/>
+  <xsd:attribute name="vonTagebuchNummer" type="TagebuchNummer"/>
+  <xsd:attribute name="ErwerbsgrundTagebuchNummer" type="TagebuchNummer"/>
+  
+  <xsd:attributeGroup name="OperationAttrs">
+    <xsd:attribute name="operation" type="GBBasisTypen:Operation"/>
+    <xsd:attribute name="operationOrder" type="xsd:positiveInteger"/>
+  </xsd:attributeGroup>
+  <xsd:attributeGroup name="gueltigBis">
+    <xsd:attribute name="bisEGBTBID" type="GbId:EGBTBID"/>
+    <xsd:attribute name="bisTagebuchNummer" type="TagebuchNummer"/>
+    <xsd:attribute name="bisTagebuchDatumZeit" type="GBBasisTypen:DatumInklZeit"/>
+    <xsd:attribute name="bisIdx" type="xsd:positiveInteger">
+      <xsd:annotation>
+        <xsd:documentation>state index inside one journal entry, defined only if an xml-instance includes history</xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+  </xsd:attributeGroup>
+  <xsd:attributeGroup name="gueltigVon">
+    <xsd:attribute name="vonEGBTBID" type="GbId:EGBTBID"/>
+    <xsd:attribute name="vonTagebuchNummer" type="TagebuchNummer"/>
+    <xsd:attribute name="vonTagebuchDatumZeit" type="GBBasisTypen:DatumInklZeit"/>
+    <xsd:attribute name="vonIdx" type="xsd:positiveInteger"/>
+  </xsd:attributeGroup>
+  
+  <xsd:element name="GrundstueckWert" type="GrundstueckWertType"/>
+  <xsd:complexType name="GrundstueckWertType">
+    <xsd:sequence>
+      <xsd:element name="Wert" type="xsd:decimal"/> 
+      <xsd:element name="NameWert" type="xsd:normalizedString">
+        <xsd:annotation>
+          <xsd:documentation>Bezeichnung des Wertes</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element> 
+      <xsd:element name="TypWert" type="xsd:NCName">
+        <xsd:annotation>
+          <xsd:documentation>maschinenlesbarer Code für die Art des Wertes</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element> 
+      <xsd:element name="Datum" type="xsd:date" minOccurs="0"/> 
+      <xsd:element name="NameDatum" type="xsd:normalizedString" minOccurs="0"/>
+      <xsd:element ref="GBBasisTypen:extensions" minOccurs="0"/>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:element name="RangNachfolge" type="RangNachfolgeType"/>
+  <xsd:complexType name="RangNachfolgeType">
+    <xsd:annotation>
+      <xsd:documentation>Das Element zeigt auf das Recht (beteiligtesGrundstueck), das in Rangnachfolge ist. Das Element wird eingebettet bei dem Recht, das im Vorrang zu einem anderen Recht steht.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="Vorrang" type="GbId:GrundstueckNummer">
+        <xsd:annotation>
+          <xsd:documentation>das beteiligte Grundstueck zu dem Recht wo dieses RangNachfolge Element eingebettet ist</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <!-- die folgenden beiden Elemente stellen zusammen den Verweis auf das beteiligteGrundstueck dar -->
+      <xsd:element name="Grundstueck" type="GbId:GrundstueckNummer"/>
+      <xsd:element name="RechtId" type="GbId:RechtId"/>
+      <xsd:element ref="GBBasisTypen:extensions" minOccurs="0"/>
+    </xsd:sequence>
+    <xsd:attribute name="id" type="xsd:ID"/>
+  </xsd:complexType>
+  <xsd:element name="Vorrang" type="VorrangType"/>
+  <xsd:complexType name="VorrangType">
+    <xsd:annotation>
+      <xsd:documentation>Das Element zeigt auf das Recht (beteiligtesGrundstueck), das im Vorrang ist. Das Element wird eingebettet bei dem Recht, das in Rangnachfolge zu einem anderen Recht steht</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="RangNachfolge" type="GbId:GrundstueckNummer">
+        <xsd:annotation>
+          <xsd:documentation>das beteiligte Grundstueck zu dem Recht wo dieses Vorrang Element eingebettet ist</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <!-- die folgenden beiden Elemente stellen zusammen den Verweis auf das beteiligteGrundstueck dar -->
+      <xsd:element name="Grundstueck" type="GbId:GrundstueckNummer"/>
+      <xsd:element name="RechtId" type="GbId:RechtId"/>
+      <xsd:element ref="GBBasisTypen:extensions" minOccurs="0"/>
+    </xsd:sequence>
+    <xsd:attribute name="id" type="xsd:ID"/>
+  </xsd:complexType>
+  <xsd:element name="Rangverschiebung">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element ref="RangNachfolge" minOccurs="0" maxOccurs="unbounded"/>
+        <xsd:element ref="Vorrang" minOccurs="0" maxOccurs="unbounded"/>
+      </xsd:sequence>
+      <xsd:attributeGroup ref="gueltigBis"/>
+      <xsd:attributeGroup ref="gueltigVon"/>
+      <xsd:attributeGroup ref="OperationAttrs"/>
+      <xsd:anyAttribute processContents="lax"/>
+    </xsd:complexType>
+  </xsd:element>
+  
+  
+</xsd:schema>

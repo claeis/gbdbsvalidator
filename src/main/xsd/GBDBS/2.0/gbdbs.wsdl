@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<definitions name="GBDBSSvc"
+
+targetNamespace="http://schemas.terravis.ch/GBDBSSvc/2.0"
+          xmlns:tns="http://schemas.terravis.ch/GBDBSSvc/2.0"
+          xmlns:ver="http://schemas.terravis.ch/Versioning/1.0"
+          xmlns:gbdbs="http://schemas.terravis.ch/GBDBS/2.0"
+          xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+          xmlns="http://schemas.xmlsoap.org/wsdl/">
+<!-- version 2.0.5 -->
+
+    <types>
+	   <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">      
+	   <xsd:import namespace="http://schemas.terravis.ch/Versioning/1.0"
+		   schemaLocation="../../Versioning/1.0/Versioning.xsd"/>
+	   <xsd:import namespace="http://schemas.terravis.ch/GBBasisTypen/2.0"
+	       schemaLocation="../../GBBasisTypen/2.0/GBBasisTypen.xsd"/>
+	   <xsd:import namespace="http://schemas.terravis.ch/GBDBS/2.0"
+	       schemaLocation="../../GBDBS/2.0/GBDBS.xsd"/>
+	   </xsd:schema>
+    </types>
+
+    <message name="GetParcelsByIdInput">
+        <part name="p1" element="gbdbs:GetParcelsByIdRequest"/>
+    </message>
+
+    <message name="GetParcelsByIdOutput">
+        <part name="p1" element="gbdbs:GetParcelsByIdResponse"/>
+    </message>
+
+    <message name="GetParcelsByIdFault">
+        <part name="p1" element="gbdbs:Exception"/>
+    </message>
+    
+    <message name="GetParcelIndexInput">
+        <part name="p1" element="gbdbs:GetParcelIndexRequest"/>
+    </message>
+
+    <message name="GetParcelIndexOutput">
+        <part name="p1" element="gbdbs:GetParcelIndexResponse"/>
+    </message>
+
+    <message name="GetParcelIndexFault">
+        <part name="p1" element="gbdbs:Exception"/>
+    </message>
+    
+    <message name="GetPersonIndexInput">
+        <part name="p1" element="gbdbs:GetPersonIndexRequest"/>
+    </message>
+
+    <message name="GetPersonIndexOutput">
+        <part name="p1" element="gbdbs:GetPersonIndexResponse"/>
+    </message>
+
+    <message name="GetPersonIndexFault">
+        <part name="p1" element="gbdbs:Exception"/>
+    </message>
+
+    <message name="GetCapabilitiesInput">
+        <part name="p1" element="gbdbs:GetCapabilitiesRequest"/>
+    </message>
+
+    <message name="GetCapabilitiesOutput">
+        <part name="p1" element="gbdbs:GetCapabilitiesResponse"/>
+    </message>
+
+    <message name="GetVersionsInput">
+        <part name="p1" element="ver:GetVersions"/>
+    </message>
+
+    <message name="GetVersionsOutput">
+        <part name="p1" element="ver:GetVersionsResponse"/>
+    </message>
+    
+    <portType name="ParcelServicePortType">
+        <operation name="GetParcelsById">
+           <input message="tns:GetParcelsByIdInput"/>
+           <output message="tns:GetParcelsByIdOutput"/>
+           <fault name="GetParcelsByIdFault" message="tns:GetParcelsByIdFault"/>
+        </operation>
+        <operation name="GetParcelIndex">
+           <input message="tns:GetParcelIndexInput"/>
+           <output message="tns:GetParcelIndexOutput"/>
+           <fault name="GetParcelIndexFault" message="tns:GetParcelIndexFault"/>
+        </operation>
+        <operation name="GetPersonIndex">
+           <input message="tns:GetPersonIndexInput"/>
+           <output message="tns:GetPersonIndexOutput"/>
+           <fault name="GetPersonIndexFault" message="tns:GetPersonIndexFault"/>
+        </operation>
+        <operation name="GetCapabilities">
+           <input message="tns:GetCapabilitiesInput"/>
+           <output message="tns:GetCapabilitiesOutput"/>
+        </operation>
+        <operation name="GetVersions">
+           <input message="tns:GetVersionsInput"/>
+           <output message="tns:GetVersionsOutput"/>
+        </operation>
+    </portType>
+
+    <binding name="ParcelServiceSoapHttpBinding" type="tns:ParcelServicePortType">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <operation name="GetParcelsById">
+           <soap:operation soapAction="http://schemas.terravis.ch/GBDBSSvc/2.0/GetParcelsById" style="document"/>
+           <input>
+               <soap:body use="literal" />
+           </input>
+           <output>
+               <soap:body use="literal" />
+           </output>
+           <fault name="GetParcelsByIdFault">
+               <soap:fault name="GetParcelsByIdFault" use="literal" />
+           </fault>
+        </operation>
+        <operation name="GetParcelIndex">
+           <soap:operation soapAction="http://schemas.terravis.ch/GBDBSSvc/2.0/GetParcelIndex" style="document"/>
+           <input>
+               <soap:body use="literal" />
+           </input>
+           <output>
+               <soap:body use="literal" />
+           </output>
+           <fault name="GetParcelIndexFault">
+               <soap:fault name="GetParcelIndexFault" use="literal" />
+           </fault>
+        </operation>
+        <operation name="GetPersonIndex">
+           <soap:operation soapAction="http://schemas.terravis.ch/GBDBSSvc/2.0/GetPersonIndex" style="document"/>
+           <input>
+               <soap:body use="literal" />
+           </input>
+           <output>
+               <soap:body use="literal" />
+           </output>
+           <fault name="GetPersonIndexFault">
+               <soap:fault name="GetPersonIndexFault" use="literal" />
+           </fault>
+        </operation>
+        <operation name="GetCapabilities">
+           <soap:operation soapAction="http://schemas.terravis.ch/GBDBSSvc/2.0/GetCapabilities" style="document"/>
+           <input>
+               <soap:body use="literal" />
+           </input>
+           <output>
+               <soap:body use="literal" />
+           </output>
+        </operation>
+        <operation name="GetVersions">
+           <soap:operation soapAction="http://schemas.terravis.ch/GBDBSSvc/1.0/GetVersions" style="document"/>
+           <input>
+               <soap:body use="literal" />
+           </input>
+           <output>
+               <soap:body use="literal" />
+           </output>
+        </operation>
+    </binding>
+    
+</definitions>
+

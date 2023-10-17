@@ -1,0 +1,13 @@
+<bindings xmlns="http://java.sun.com/xml/ns/jaxb" version="2.1" 
+        xmlns:GbId="http://schemas.terravis.ch/GBBasisId/2.0" 
+  >
+ <bindings scd="x-schema::GbId"> 
+   <schemaBindings>
+      <package name="ch.ehi.gbdbsvalidator.jaxb.gbbasisid._2_0"/>
+      <nameXmlTransform>
+        <typeName suffix="Type"/>
+      </nameXmlTransform>
+    </schemaBindings>
+ </bindings>
+</bindings>
+

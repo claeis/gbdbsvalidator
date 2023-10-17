@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xmlns:GbId="http://schemas.terravis.ch/GBBasisId/2.0"
+  xmlns:GBBasisTypen="http://schemas.terravis.ch/GBBasisTypen/2.0"
+  xmlns:gbdbs="http://schemas.terravis.ch/GBDBS/2.0" 
+  xmlns="http://schemas.terravis.ch/GBDBS/2.0/ext1" 
+  targetNamespace="http://schemas.terravis.ch/GBDBS/2.0/ext1" 
+  elementFormDefault="qualified" attributeFormDefault="unqualified"
+  version="2.0.0"
+  >
+  <xsd:import namespace="http://schemas.terravis.ch/GBBasisId/2.0" schemaLocation="../../GBBasisId/2.0/GBBasisId.xsd"/>
+  <xsd:import namespace="http://schemas.terravis.ch/GBBasisTypen/2.0" schemaLocation="../../GBBasisTypen/2.0/GBBasisTypen.xsd"/>
+  <xsd:import namespace="http://schemas.terravis.ch/GBDBS/2.0" schemaLocation="GBDBS.xsd"/>
+  
+  
+<xsd:element name="GetPersonsResponse" type="GetPersonsResponseType"/>
+<xsd:complexType  name="GetPersonsResponseType">
+  <xsd:sequence>
+    <xsd:element ref="GBBasisTypen:PersonGB" minOccurs="0" maxOccurs="unbounded"/>
+    <xsd:element ref="GBBasisTypen:extensions" minOccurs="0"/>
+  </xsd:sequence>
+</xsd:complexType>
+
+  
+<xsd:element name="GetPersonsRequest" type="GetPersonsRequestType" substitutionGroup="gbdbs:AbstractRequest"/>
+<xsd:complexType  name="GetPersonsRequestType">
+  <xsd:complexContent>
+    <xsd:extension base="gbdbs:AbstractRequestType">
+      <xsd:sequence>
+        <xsd:element name="BFSNr" type="GBBasisTypen:BFSNr" minOccurs="0"/>
+        <xsd:element name="PersonenArt" type="gbdbs:PersonenArt"/>
+        <xsd:element name="NamePerson" type="gbdbs:NameKriterium"/>
+        <xsd:element name="Vorname" type="gbdbs:NameKriterium" minOccurs="0"/>
+        <xsd:element name="Jahrgang" minOccurs="0">
+          <xsd:simpleType>
+            <xsd:restriction base="xsd:integer">
+              <xsd:minInclusive value="1880"/>
+              <xsd:maxInclusive value="2100"/>
+            </xsd:restriction>
+          </xsd:simpleType>
+        </xsd:element>
+        <xsd:element name="Sitz" type="gbdbs:NameKriterium" minOccurs="0"/>
+        <xsd:element name="GemeinschaftArt" type="GBBasisTypen:GemeinschaftArt" minOccurs="0"/>
+        <xsd:element ref="GBBasisTypen:extensions" minOccurs="0"/>
+      </xsd:sequence>
+    </xsd:extension>
+  </xsd:complexContent>
+</xsd:complexType>
+</xsd:schema>

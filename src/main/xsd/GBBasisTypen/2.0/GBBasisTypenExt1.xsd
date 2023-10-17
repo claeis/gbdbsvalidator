@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xmlns="http://schemas.terravis.ch/GBBasisTypen/2.0/ext1"
+  xmlns:GbId="http://schemas.terravis.ch/GBBasisId/2.0"
+  xmlns:GBBasisTypen="http://schemas.terravis.ch/GBBasisTypen/2.0"
+  targetNamespace="http://schemas.terravis.ch/GBBasisTypen/2.0/ext1" elementFormDefault="qualified"
+  attributeFormDefault="unqualified" version="2.0.5">
+  <xsd:import namespace="http://schemas.terravis.ch/GBBasisId/2.0"
+    schemaLocation="../../GBBasisId/2.0/GBBasisId.xsd"/>
+  <xsd:import namespace="http://schemas.terravis.ch/GBBasisTypen/2.0" 
+    schemaLocation="../../GBBasisTypen/2.0/GBBasisTypen.xsd"/>
+  
+  <xsd:complexType name="BelegZitatType">
+    <xsd:sequence>
+      <xsd:element name="EGBTBID" type="GbId:EGBTBID" minOccurs="0"/>
+      <xsd:element name="TagebuchNummer" minOccurs="1">
+        <xsd:simpleType>
+          <xsd:restriction base="xsd:normalizedString">
+            <xsd:maxLength value="17"/>
+          </xsd:restriction>
+        </xsd:simpleType>
+      </xsd:element>
+      <xsd:element name="TagebuchDatumZeit" type="GBBasisTypen:DatumInklZeit" minOccurs="1"/>
+      <xsd:element name="Idx" type="xsd:positiveInteger" minOccurs="0"/>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:element name="BeteiligtesGrundstueckExt">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element name="Grundstueck" type="GbId:GrundstueckNummer" minOccurs="1" maxOccurs="1"/>
+        <xsd:element name="begruendung" type="BelegZitatType" minOccurs="0"/>
+        <xsd:element name="zusatzbelege" minOccurs="0" maxOccurs="unbounded">
+          <xsd:complexType>
+            <xsd:complexContent>
+              <xsd:extension base="BelegZitatType">
+                <xsd:attribute name="vonEGBTBID" type="GbId:EGBTBID" use="required"/>
+                <xsd:attribute name="vonIdx" type="xsd:positiveInteger" use="optional"/>
+                <xsd:attribute name="bisEGBTBID" type="GbId:EGBTBID" use="optional"/>
+                <xsd:attribute name="bisIdx" type="xsd:positiveInteger" use="optional"/>
+              </xsd:extension>
+            </xsd:complexContent>
+          </xsd:complexType>
+        </xsd:element>
+      </xsd:sequence>
+      <xsd:attribute name="vonEGBTBID" type="GbId:EGBTBID" use="required"/>
+      <xsd:attribute name="vonIdx" type="xsd:positiveInteger" use="optional"/>
+      <xsd:attribute name="bisEGBTBID" type="GbId:EGBTBID" use="optional"/>
+      <xsd:attribute name="bisIdx" type="xsd:positiveInteger" use="optional"/>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="GlaeubigerExt">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element name="Person" type="GbId:PersonId" minOccurs="1" maxOccurs="1"/>
+        <xsd:element name="begruendung" type="BelegZitatType" minOccurs="0"/>
+        <xsd:element name="zusatzbelege" minOccurs="0" maxOccurs="unbounded">
+          <xsd:complexType>
+            <xsd:complexContent>
+              <xsd:extension base="BelegZitatType">
+                <xsd:attribute name="vonEGBTBID" type="GbId:EGBTBID" use="required"/>
+                <xsd:attribute name="vonIdx" type="xsd:positiveInteger" use="optional"/>
+                <xsd:attribute name="bisEGBTBID" type="GbId:EGBTBID" use="optional"/>
+                <xsd:attribute name="bisIdx" type="xsd:positiveInteger" use="optional"/>
+              </xsd:extension>
+            </xsd:complexContent>
+          </xsd:complexType>
+        </xsd:element>
+      </xsd:sequence>
+      <xsd:attribute name="vonEGBTBID" type="GbId:EGBTBID" use="required"/>
+      <xsd:attribute name="vonIdx" type="xsd:positiveInteger" use="optional"/>
+      <xsd:attribute name="bisEGBTBID" type="GbId:EGBTBID" use="optional"/>
+      <xsd:attribute name="bisIdx" type="xsd:positiveInteger" use="optional"/>
+    </xsd:complexType>
+  </xsd:element>
+  
+</xsd:schema>

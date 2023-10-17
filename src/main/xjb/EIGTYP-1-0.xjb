@@ -1,0 +1,12 @@
+<bindings xmlns="http://java.sun.com/xml/ns/jaxb" version="2.1" 
+        xmlns:EIGTYP-1-0="http://schemas.bfs.admin.ch/EIGTYP/1.0" 
+  >
+ <bindings scd="x-schema::EIGTYP-1-0"> 
+   <schemaBindings>
+      <package name="ch.ehi.gbdbsvalidator.jaxb.eigtyp._1_0"/>
+      <nameXmlTransform>
+        <typeName suffix="Type"/>
+      </nameXmlTransform>
+    </schemaBindings>
+ </bindings>
+</bindings>

@@ -1,0 +1,11 @@
+<bindings xmlns="http://java.sun.com/xml/ns/jaxb" version="2.1" 
+        xmlns:terravisHeader="http://schemas.terravis.ch/TerravisHeader/1.0" 
+  >
+ <bindings scd="x-schema::terravisHeader"> 
+   <schemaBindings>
+      <package name="ch.ehi.gbdbsvalidator.jaxb.terravisheader._1_0"/>
+    </schemaBindings>
+ </bindings>
+ 
+</bindings>
+

@@ -1,0 +1,10 @@
+<bindings xmlns="http://java.sun.com/xml/ns/jaxb" version="2.1"
+          xmlns:GBBasisTypenExt2="http://schemas.terravis.ch/GBBasisTypen/2.0/ext2"
+>
+  <bindings scd="x-schema::GBBasisTypenExt2">
+    <schemaBindings>
+      <package name="ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_0.ext2"/>
+    </schemaBindings>
+  </bindings>
+
+</bindings>
