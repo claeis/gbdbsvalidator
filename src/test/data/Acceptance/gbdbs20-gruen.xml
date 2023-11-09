@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns34:GBDBS xmlns:xmime="http://www.w3.org/2005/05/xmlmime"  xmlns:ns8="http://schemas.terravis.ch/GBBasisTypen/2.0"  xmlns:ns18="http://www.ech.ch/xmlns/eCH-0007/5"  xmlns:ns34="http://schemas.terravis.ch/GBDBS-Datei/2.0" >
+	<ns34:HEADERSECTION/>
+	<ns34:DATASECTION>
+		<ns34:Vollbestand>
+			<ns8:Liegenschaft>
+				<ns8:Nummer>CH887722167773:11::test::</ns8:Nummer>
+				<ns8:istKopie>false</ns8:istKopie>
+				<ns8:InhaltLiegenschaft BegruendungEGBTBID="CH97831229777" BegruendungTagebuchNummer="lt.Katg" BegruendungTagebuchDatumZeit="1919-07-01T00:00:01" BegruendungIdx="1">
+					<ns8:Flaechenmass>999</ns8:Flaechenmass>
+				</ns8:InhaltLiegenschaft>
+				<ns8:Flurnamen>
+					<ns8:Flurname>
+						<ns8:Name>Testzone</ns8:Name>
+					</ns8:Flurname>
+				</ns8:Flurnamen>
+				<ns8:Flurnamen>
+					<ns8:Flurname>
+						<ns8:Name>read-only</ns8:Name>
+					</ns8:Flurname>
+				</ns8:Flurnamen>
+				<ns8:GBPlaene>
+					<ns8:GBPlan>
+						<ns8:Nummer>26</ns8:Nummer>
+					</ns8:GBPlan>
+				</ns8:GBPlaene>
+				<ns8:Gemeinde>
+					<ns8:Gemeinde>
+						<ns18:municipalityId>9901</ns18:municipalityId>
+						<ns18:municipalityName>Testdorf</ns18:municipalityName>
+					</ns8:Gemeinde>
+				</ns8:Gemeinde>
+				<ns8:GBAmt>
+					<ns8:GBAmt>
+						<ns8:Name>Test GB-Amt</ns8:Name>
+					</ns8:GBAmt>
+				</ns8:GBAmt>
+				<ns8:Gebaeude>
+					<ns8:Gebaeude>
+						<ns8:Nummer>981</ns8:Nummer>
+					</ns8:Gebaeude>
+				</ns8:Gebaeude>
+				<ns8:BodbdAnteil>
+					<ns8:Bodenbedeckung>
+						<ns8:ArtBezeichnung>Gartenanlage</ns8:ArtBezeichnung>
+					</ns8:Bodenbedeckung>
+				</ns8:BodbdAnteil>
+			</ns8:Liegenschaft>
+			<ns8:NatuerlichePersonGB>
+				<ns8:Nummer>CH792277771621:::::</ns8:Nummer>
+				<ns8:InhaltNatuerlichePersonGB BegruendungEGBTBID="CH97831229777" BegruendungTagebuchNummer="lt.Katg" BegruendungTagebuchDatumZeit="1919-07-01T00:00:01" BegruendungIdx="1">
+					<ns8:Name>Müller</ns8:Name>
+					<ns8:Vorname>Ulrich Walter</ns8:Vorname>
+					<ns8:Geburtsjahr>1949</ns8:Geburtsjahr>
+					<ns8:Geburtsmonat>12</ns8:Geburtsmonat>
+					<ns8:Geburtstag>13</ns8:Geburtstag>
+					<ns8:Geschlecht>maennlich</ns8:Geschlecht>
+					<ns8:Heimatort>Trubschachen</ns8:Heimatort>
+					<ns8:Staatsangehoerigkeit>Testland</ns8:Staatsangehoerigkeit>
+				</ns8:InhaltNatuerlichePersonGB>
+				<ns8:PersonStamm>
+					<ns8:NatuerlichePerson>
+						<ns8:Name>Müller</ns8:Name>
+						<ns8:Adresse>
+							<ns8:Adresse>
+								<ns8:Strasse>Bahnhofsplatz</ns8:Strasse>
+								<ns8:Hausnummer>1</ns8:Hausnummer>
+								<ns8:PLZ>8000</ns8:PLZ>
+								<ns8:Ort>Zürich</ns8:Ort>
+								<ns8:Land>Testland</ns8:Land>
+								<ns8:GWR_EGID>1</ns8:GWR_EGID>
+								<ns8:GWR_EDID>1</ns8:GWR_EDID>
+								<ns8:Rolle>Wohnadresse</ns8:Rolle>
+							</ns8:Adresse>
+						</ns8:Adresse>
+						<ns8:Vorname>Ulrich Walter</ns8:Vorname>
+						<ns8:Geburtsjahr>1949</ns8:Geburtsjahr>
+						<ns8:Geburtsmonat>12</ns8:Geburtsmonat>
+						<ns8:Geburtstag>13</ns8:Geburtstag>
+						<ns8:Zivilstand>ledig</ns8:Zivilstand>
+						<ns8:LedigerName>Obertester</ns8:LedigerName>
+						<ns8:Rufname>Ueli</ns8:Rufname>
+						<ns8:Buergerort>Trubschachen</ns8:Buergerort>
+						<ns8:NameDerEltern>Meier</ns8:NameDerEltern>
+						<ns8:Geschlecht>maennlich</ns8:Geschlecht>
+						<ns8:EPID>756.1234.5678.97</ns8:EPID>
+					</ns8:NatuerlichePerson>
+				</ns8:PersonStamm>
+			</ns8:NatuerlichePersonGB>
+			<ns8:EigentumAnteil>
+				<ns8:InhaltEigentumAnteil  BegruendungEGBTBID="CH97831229777" BegruendungTagebuchNummer="lt.Katg" BegruendungTagebuchDatumZeit="1919-07-01T00:00:01" BegruendungIdx="1">
+					<ns8:istKopie>false</ns8:istKopie>
+					<ns8:AnteilZaehler>1</ns8:AnteilZaehler>
+					<ns8:AnteilNenner>1</ns8:AnteilNenner>
+					<ns8:SubjektivDinglich>false</ns8:SubjektivDinglich>
+					<ns8:Eigentumsform>AlleinEigentum</ns8:Eigentumsform>
+				</ns8:InhaltEigentumAnteil>
+				<ns8:Nummer>CH4955E1168:::</ns8:Nummer>
+				<ns8:Berechtigte>CH792277771621:::::</ns8:Berechtigte>
+				<ns8:belastetesGrundstueck>CH887722167773:11::test::</ns8:belastetesGrundstueck>
+				<ns8:Erwerbsgrund>
+					<ns8:Erwerbsgrund>
+						<ns8:ErwerbsartStichwort>
+							<ns8:Erwerbsgrund_Erwerbsart>
+								<ns8:Stichwort>Erbgang</ns8:Stichwort>
+								<ns8:uuid>1946A358-37B0-4640-B458-C0CAD7F25C2D</ns8:uuid>
+							</ns8:Erwerbsgrund_Erwerbsart>
+						</ns8:ErwerbsartStichwort>
+						<ns8:Datum>2010-06-28</ns8:Datum>
+						<ns8:TagebuchNummer>294</ns8:TagebuchNummer>
+					</ns8:Erwerbsgrund>
+				</ns8:Erwerbsgrund>
+			</ns8:EigentumAnteil>
+	</ns34:Vollbestand>
+</ns34:DATASECTION>
+</ns34:GBDBS>

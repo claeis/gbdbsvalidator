@@ -20,30 +20,6 @@ public class Grundstuecke {
         InhaltGrundstueckType oldest=getFirstInhaltGrundstueck(grundstueck);
         return oldest.getBegruendungTagebuchDatumZeit();
     }
-    public static JAXBElement getCurrentInhaltGrundstueck(JAXBElement gsEle) {
-        if(gsEle.getValue() instanceof ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_1.GrundstueckType) {
-            for(JAXBElement<? extends ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_1.InhaltGrundstueckType> inhaltEle:((ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_1.GrundstueckType)gsEle.getValue()).getInhaltGrundstueck()){
-                ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_1.InhaltGrundstueckType inhalt=(ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_1.InhaltGrundstueckType)inhaltEle.getValue();
-                XMLGregorianCalendar von = inhalt.getVonTagebuchDatumZeit();
-                XMLGregorianCalendar bis = inhalt.getBisTagebuchDatumZeit();
-                if(bis==null){
-                    return inhaltEle;
-                }
-            }
-        }else if(gsEle.getValue() instanceof ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_0.GrundstueckType){
-            for(JAXBElement<? extends InhaltGrundstueckType> inhaltEle:((GrundstueckType)gsEle.getValue()).getInhaltGrundstueck()){
-                InhaltGrundstueckType inhalt=(InhaltGrundstueckType)inhaltEle.getValue();
-                XMLGregorianCalendar von = inhalt.getBegruendungTagebuchDatumZeit();
-                XMLGregorianCalendar bis = inhalt.getTagebuchDatumZeit();
-                if(bis==null){
-                    return inhaltEle;
-                }
-            }
-        }else {
-            throw new IllegalArgumentException("unexpected GrundstueckType"+gsEle.getValue().getClass());
-        }
-        return null;
-    }
     public static InhaltGrundstueckType getFirstInhaltGrundstueck(GrundstueckType gs) {
         InhaltGrundstueckType ersterInhalt=null;
         for(JAXBElement<? extends InhaltGrundstueckType> inhaltEle:gs.getInhaltGrundstueck()){
