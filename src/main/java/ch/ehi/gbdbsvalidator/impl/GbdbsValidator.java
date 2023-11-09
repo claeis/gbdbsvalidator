@@ -7,8 +7,10 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 
 import javax.xml.bind.JAXBContext;
@@ -17,6 +19,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.Marshaller;
 import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLOutputFactory;
@@ -32,6 +35,9 @@ import ch.ehi.basics.types.OutParam;
 import ch.ehi.gbdbsvalidator.Validator.Status;
 import ch.ehi.gbdbsvalidator.jaxb.eigtyp._1_0.Eigentuemer;
 import ch.ehi.gbdbsvalidator.jaxb.eigtyp._1_0.Eigentuemerindex;
+import ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_0.GrundstueckType;
+import ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_0.InhaltGrundstueckType;
+import ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_1.VerpfaendetesGrundstueckGrundpfandrechtType;
 
 public class GbdbsValidator {
 public static final String RECORD_TYP_EIGENTUEMER = "Eigentuemer";
@@ -457,6 +463,12 @@ private static final String PREFIX_EIG = "E_EIG:";
 	    }
         status.value=Status.rot;
     }
+    private void error(String id,String key,String msg) {
+        if(okToLog(id)) {
+            logger.logRot(id,key,msg);
+        }
+        status.value=Status.rot;
+    }
     private void technicalError(String msg,Throwable ex) {
         logger.logSchwarz(msg,ex);
         status.value=Status.schwarz;
@@ -621,7 +633,7 @@ private static final String PREFIX_EIG = "E_EIG:";
         }else {
             throw new IllegalStateException();
         }
-        boolean istAktuell=Grundstuecke.getCurrentInhaltGrundstueck(gsEle)!=null;
+        boolean istAktuell=GbdbsValidator.isCurrent(gsEle);
         if(istAktuell) {
             anzahlGrundstuecke++;
             if(gsEle.getValue() instanceof ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_0.BergwerkType) {
@@ -664,6 +676,8 @@ private static final String PREFIX_EIG = "E_EIG:";
                 anzahlGrundstueckeOhneEGRID++;
             }
         }
+        validateInhaltGrundstueckVonBis(gbdbsGsId,gsEle);
+
         if(NO_SHARED_MAP || index.get(PREFIX_GS+gbdbsGsId)==null) {
             index.put(PREFIX_GS+gbdbsGsId,eleToString(gsEle));
         }
@@ -700,6 +714,7 @@ private static final String PREFIX_EIG = "E_EIG:";
                 }
             }
         }
+        validateInhaltRechtVonBis(gbdbsRechtId,rEle);
 	    
 			if(recht instanceof ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_0.EigentumAnteilType){
 		        if(istAktuell) {
@@ -1012,6 +1027,9 @@ private static final String PREFIX_EIG = "E_EIG:";
                 }
             }
         }
+        
+        validateInhaltPersonGBVonBis(gbdbsPersId,pEle);
+        
         if(NO_SHARED_MAP || index.get(PREFIX_PERS+gbdbsPersId)==null) {
             index.put(PREFIX_PERS+gbdbsPersId, eleToString(pEle));
         }
@@ -1199,8 +1217,532 @@ private static final String PREFIX_EIG = "E_EIG:";
     private boolean dateInCurrentYear(XMLGregorianCalendar val) {
         return dateInRange(val,stichjahr);
     }
+    private static boolean isCurrent(JAXBElement gsEle) {
+        if(gsEle.getValue() instanceof ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_1.GrundstueckType) {
+            for(JAXBElement<? extends ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_1.InhaltGrundstueckType> inhaltEle:((ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_1.GrundstueckType)gsEle.getValue()).getInhaltGrundstueck()){
+                ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_1.InhaltGrundstueckType inhalt=(ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_1.InhaltGrundstueckType)inhaltEle.getValue();
+                XMLGregorianCalendar von = inhalt.getVonTagebuchDatumZeit();
+                XMLGregorianCalendar bis = inhalt.getBisTagebuchDatumZeit();
+                if(bis==null){
+                    return true;
+                }
+            }
+        }else if(gsEle.getValue() instanceof ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_0.GrundstueckType){
+            for(JAXBElement<? extends InhaltGrundstueckType> inhaltEle:((GrundstueckType)gsEle.getValue()).getInhaltGrundstueck()){
+                InhaltGrundstueckType inhalt=(InhaltGrundstueckType)inhaltEle.getValue();
+                XMLGregorianCalendar von = inhalt.getBegruendungTagebuchDatumZeit();
+                XMLGregorianCalendar bis = inhalt.getTagebuchDatumZeit();
+                if(bis==null){
+                    return true;
+                }
+            }
+        }else {
+            throw new IllegalArgumentException("unexpected GrundstueckType"+gsEle.getValue().getClass());
+        }
+        return false;
+    }
+    private void validateInhaltGrundstueckVonBis(String gbdbsGsId,JAXBElement gsEle) {
+        if(gsEle.getValue() instanceof ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_1.GrundstueckType) {
+            int bisNull=0;
+            int vonNull=0;
+            List<ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_1.InhaltGrundstueckType> inhaltv=new ArrayList<ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_1.InhaltGrundstueckType>(); 
+            for(JAXBElement<? extends ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_1.InhaltGrundstueckType> inhaltEle:((ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_1.GrundstueckType)gsEle.getValue()).getInhaltGrundstueck()){
+                ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_1.InhaltGrundstueckType inhalt=(ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_1.InhaltGrundstueckType)inhaltEle.getValue();
+                inhaltv.add(inhalt);
+                XMLGregorianCalendar von = inhalt.getVonTagebuchDatumZeit();
+                XMLGregorianCalendar bis = inhalt.getBisTagebuchDatumZeit();
+                if(bis==null){
+                    bisNull++;
+                }
+                if(von==null){
+                    vonNull++;
+                }
+            }
+            if(vonNull>0) {
+                error(Logger.ID_7_3_GRUNDSTUECK_OHNE_VON,gbdbsGsId,"InhaltGrundstueck ohne von/Eintragungsdatum "+gbdbsGsId);
+            }
+            if(bisNull>1) {
+                error(Logger.ID_7_4_GRUNDSTUECK_MEHRERE_OHNE_BIS,gbdbsGsId,"mehrere InhaltGrundstueck ohne bis/Streichungsdatum "+gbdbsGsId);
+            }
+            if(vonNull==0 && bisNull==1) {
+                // Reihenfolge validieren
+                // gem. von sortieren
+                inhaltv.sort(new Comparator<ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_1.InhaltGrundstueckType>() {
+                    @Override
+                    public int compare(ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_1.InhaltGrundstueckType o1,
+                            ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_1.InhaltGrundstueckType o2) {
+                        XMLGregorianCalendar von1 = o1.getVonTagebuchDatumZeit();
+                        XMLGregorianCalendar von2 = o2.getVonTagebuchDatumZeit();
+                        return GbdbsValidator.compare(von1, von2);
+                    }
+                    
+                });
+                // bis[i]==von[i+1] validieren
+                for(int i=1;i<inhaltv.size();i++) {
+                    if(inhaltv.get(i-1).getBisEGBTBID()!=null  && !inhaltv.get(i-1).getBisEGBTBID().equals(inhaltv.get(i).getVonEGBTBID())) {
+                        warning(Logger.ID_7_5_GRUNDSTUECK_EINTRAGUNGSREIHENFOLGE,gbdbsGsId,"Grundstueck Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsGsId);
+                    }else if(inhaltv.get(i-1).getBisEGBTBID()==null  && inhaltv.get(i).getVonEGBTBID()!=null) {
+                        warning(Logger.ID_7_5_GRUNDSTUECK_EINTRAGUNGSREIHENFOLGE,gbdbsGsId,"Grundstueck Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsGsId);
+                    }else if(inhaltv.get(i-1).getBisTagebuchNummer()!=null && !inhaltv.get(i-1).getBisTagebuchNummer().equals(inhaltv.get(i).getVonTagebuchNummer())) {
+                        warning(Logger.ID_7_5_GRUNDSTUECK_EINTRAGUNGSREIHENFOLGE,gbdbsGsId,"Grundstueck Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsGsId);
+                    }else if(inhaltv.get(i-1).getBisTagebuchNummer()==null && inhaltv.get(i).getVonTagebuchNummer()!=null) {
+                        warning(Logger.ID_7_5_GRUNDSTUECK_EINTRAGUNGSREIHENFOLGE,gbdbsGsId,"Grundstueck Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsGsId);
+                    }else if(inhaltv.get(i-1).getBisTagebuchDatumZeit()!=null && !inhaltv.get(i-1).getBisTagebuchDatumZeit().equals(inhaltv.get(i).getVonTagebuchDatumZeit())) {
+                        warning(Logger.ID_7_5_GRUNDSTUECK_EINTRAGUNGSREIHENFOLGE,gbdbsGsId,"Grundstueck Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsGsId);
+                    }else if(inhaltv.get(i-1).getBisTagebuchDatumZeit()==null && inhaltv.get(i).getVonTagebuchDatumZeit()!=null) {
+                        warning(Logger.ID_7_5_GRUNDSTUECK_EINTRAGUNGSREIHENFOLGE,gbdbsGsId,"Grundstueck Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsGsId);
+                    }else if(inhaltv.get(i-1).getBisIdx()!=null && !inhaltv.get(i-1).getBisIdx().equals(inhaltv.get(i).getVonIdx())) {
+                        warning(Logger.ID_7_5_GRUNDSTUECK_EINTRAGUNGSREIHENFOLGE,gbdbsGsId,"Grundstueck Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsGsId);
+                    }else if(inhaltv.get(i-1).getBisIdx()==null && inhaltv.get(i).getVonIdx()!=null) {
+                        warning(Logger.ID_7_5_GRUNDSTUECK_EINTRAGUNGSREIHENFOLGE,gbdbsGsId,"Grundstueck Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsGsId);
+                    }else {
+                        // all equal; ok
+                    }
+                }
+            }
+        }else if(gsEle.getValue() instanceof ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_0.GrundstueckType){
+            int bisNull=0;
+            int vonNull=0;
+            List<ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_0.InhaltGrundstueckType> inhaltv=new ArrayList<ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_0.InhaltGrundstueckType>(); 
+            for(JAXBElement<? extends ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_0.InhaltGrundstueckType> inhaltEle:((ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_0.GrundstueckType)gsEle.getValue()).getInhaltGrundstueck()){
+                ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_0.InhaltGrundstueckType inhalt=(ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_0.InhaltGrundstueckType)inhaltEle.getValue();
+                inhaltv.add(inhalt);
+                XMLGregorianCalendar von = inhalt.getBegruendungTagebuchDatumZeit();
+                XMLGregorianCalendar bis = inhalt.getTagebuchDatumZeit();
+                if(bis==null){
+                    bisNull++;
+                }
+                if(von==null){
+                    vonNull++;
+                }
+            }
+            if(vonNull>0) {
+                error(Logger.ID_7_3_GRUNDSTUECK_OHNE_VON,gbdbsGsId,"InhaltGrundstueck ohne von/Eintragungsdatum "+gbdbsGsId);
+            }
+            if(bisNull>1) {
+                error(Logger.ID_7_4_GRUNDSTUECK_MEHRERE_OHNE_BIS,gbdbsGsId,"mehrere InhaltGrundstueck ohne bis/Streichungsdatum "+gbdbsGsId);
+            }
+            if(vonNull==0 && bisNull==1) {
+                // Reihenfolge validieren
+                // gem. von sortieren
+                inhaltv.sort(new Comparator<ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_0.InhaltGrundstueckType>() {
+                    @Override
+                    public int compare(ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_0.InhaltGrundstueckType o1,
+                            ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_0.InhaltGrundstueckType o2) {
+                        XMLGregorianCalendar von1 = o1.getBegruendungTagebuchDatumZeit();
+                        XMLGregorianCalendar von2 = o2.getBegruendungTagebuchDatumZeit();
+                        return GbdbsValidator.compare(von1, von2);
+                    }
+                    
+                });
+                // bis[i]==von[i+1] validieren
+                for(int i=1;i<inhaltv.size();i++) {
+                    if(inhaltv.get(i-1).getEGBTBID()!=null  && !inhaltv.get(i-1).getEGBTBID().equals(inhaltv.get(i).getBegruendungEGBTBID())) {
+                        warning(Logger.ID_7_5_GRUNDSTUECK_EINTRAGUNGSREIHENFOLGE,gbdbsGsId,"Grundstueck Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsGsId);
+                    }else if(inhaltv.get(i-1).getEGBTBID()==null  && inhaltv.get(i).getBegruendungEGBTBID()!=null) {
+                        warning(Logger.ID_7_5_GRUNDSTUECK_EINTRAGUNGSREIHENFOLGE,gbdbsGsId,"Grundstueck Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsGsId);
+                    }else if(inhaltv.get(i-1).getTagebuchNummer()!=null && !inhaltv.get(i-1).getTagebuchNummer().equals(inhaltv.get(i).getBegruendungTagebuchNummer())) {
+                        warning(Logger.ID_7_5_GRUNDSTUECK_EINTRAGUNGSREIHENFOLGE,gbdbsGsId,"Grundstueck Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsGsId);
+                    }else if(inhaltv.get(i-1).getTagebuchNummer()==null && inhaltv.get(i).getBegruendungTagebuchNummer()!=null) {
+                        warning(Logger.ID_7_5_GRUNDSTUECK_EINTRAGUNGSREIHENFOLGE,gbdbsGsId,"Grundstueck Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsGsId);
+                    }else if(inhaltv.get(i-1).getTagebuchDatumZeit()!=null && !inhaltv.get(i-1).getTagebuchDatumZeit().equals(inhaltv.get(i).getBegruendungTagebuchDatumZeit())) {
+                        warning(Logger.ID_7_5_GRUNDSTUECK_EINTRAGUNGSREIHENFOLGE,gbdbsGsId,"Grundstueck Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsGsId);
+                    }else if(inhaltv.get(i-1).getTagebuchDatumZeit()==null && inhaltv.get(i).getBegruendungTagebuchDatumZeit()!=null) {
+                        warning(Logger.ID_7_5_GRUNDSTUECK_EINTRAGUNGSREIHENFOLGE,gbdbsGsId,"Grundstueck Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsGsId);
+                    }else if(inhaltv.get(i-1).getIdx()!=null && !inhaltv.get(i-1).getIdx().equals(inhaltv.get(i).getBegruendungIdx())) {
+                        warning(Logger.ID_7_5_GRUNDSTUECK_EINTRAGUNGSREIHENFOLGE,gbdbsGsId,"Grundstueck Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsGsId);
+                    }else if(inhaltv.get(i-1).getIdx()==null && inhaltv.get(i).getBegruendungIdx()!=null) {
+                        warning(Logger.ID_7_5_GRUNDSTUECK_EINTRAGUNGSREIHENFOLGE,gbdbsGsId,"Grundstueck Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsGsId);
+                    }else {
+                        // all equal; ok
+                    }
+                }
+            }
+        }else {
+            throw new IllegalArgumentException("unexpected GrundstueckType"+gsEle.getValue().getClass());
+        }
+    }
+    private void validateInhaltRechtVonBis(String gbdbsRechtId,JAXBElement gsEle) {
+        if(gsEle.getValue() instanceof ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_1.RechtType) {
+            {
+                int bisNull=0;
+                int vonNull=0;
+                List<ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_1.InhaltRechtType> inhaltv=new ArrayList<ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_1.InhaltRechtType>(); 
+                for(JAXBElement<? extends ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_1.InhaltRechtType> inhaltEle:((ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_1.RechtType)gsEle.getValue()).getInhaltRecht()){
+                    ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_1.InhaltRechtType inhalt=(ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_1.InhaltRechtType)inhaltEle.getValue();
+                    inhaltv.add(inhalt);
+                    XMLGregorianCalendar von = inhalt.getVonTagebuchDatumZeit();
+                    XMLGregorianCalendar bis = inhalt.getBisTagebuchDatumZeit();
+                    if(bis==null){
+                        bisNull++;
+                    }
+                    if(von==null){
+                        vonNull++;
+                    }
+                }
+                if(vonNull>0) {
+                    error(Logger.ID_12_3_RECHT_OHNE_VON,gbdbsRechtId,"InhaltRecht ohne von/Eintragungsdatum "+gbdbsRechtId);
+                }
+                if(bisNull>1) {
+                    error(Logger.ID_12_4_RECHT_MEHRERE_OHNE_BIS,gbdbsRechtId,"mehrere InhaltRecht ohne bis/Streichungsdatum "+gbdbsRechtId);
+                }
+                if(vonNull==0 && bisNull==1) {
+                    // Reihenfolge validieren
+                    // gem. von sortieren
+                    inhaltv.sort(new Comparator<ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_1.InhaltRechtType>() {
+                        @Override
+                        public int compare(ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_1.InhaltRechtType o1,
+                                ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_1.InhaltRechtType o2) {
+                            XMLGregorianCalendar von1 = o1.getVonTagebuchDatumZeit();
+                            XMLGregorianCalendar von2 = o2.getVonTagebuchDatumZeit();
+                            return GbdbsValidator.compare(von1, von2);
+                        }
+                        
+                    });
+                    // bis[i]==von[i+1] validieren
+                    for(int i=1;i<inhaltv.size();i++) {
+                        if(inhaltv.get(i-1).getBisEGBTBID()!=null  && !inhaltv.get(i-1).getBisEGBTBID().equals(inhaltv.get(i).getVonEGBTBID())) {
+                            warning(Logger.ID_12_5_RECHT_EINTRAGUNGSREIHENFOLGE,gbdbsRechtId,"Recht Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsRechtId);
+                        }else if(inhaltv.get(i-1).getBisEGBTBID()==null  && inhaltv.get(i).getVonEGBTBID()!=null) {
+                            warning(Logger.ID_12_5_RECHT_EINTRAGUNGSREIHENFOLGE,gbdbsRechtId,"Recht Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsRechtId);
+                        }else if(inhaltv.get(i-1).getBisTagebuchNummer()!=null && !inhaltv.get(i-1).getBisTagebuchNummer().equals(inhaltv.get(i).getVonTagebuchNummer())) {
+                            warning(Logger.ID_12_5_RECHT_EINTRAGUNGSREIHENFOLGE,gbdbsRechtId,"Recht Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsRechtId);
+                        }else if(inhaltv.get(i-1).getBisTagebuchNummer()==null && inhaltv.get(i).getVonTagebuchNummer()!=null) {
+                            warning(Logger.ID_12_5_RECHT_EINTRAGUNGSREIHENFOLGE,gbdbsRechtId,"Recht Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsRechtId);
+                        }else if(inhaltv.get(i-1).getBisTagebuchDatumZeit()!=null && !inhaltv.get(i-1).getBisTagebuchDatumZeit().equals(inhaltv.get(i).getVonTagebuchDatumZeit())) {
+                            warning(Logger.ID_12_5_RECHT_EINTRAGUNGSREIHENFOLGE,gbdbsRechtId,"Recht Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsRechtId);
+                        }else if(inhaltv.get(i-1).getBisTagebuchDatumZeit()==null && inhaltv.get(i).getVonTagebuchDatumZeit()!=null) {
+                            warning(Logger.ID_12_5_RECHT_EINTRAGUNGSREIHENFOLGE,gbdbsRechtId,"Recht Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsRechtId);
+                        }else if(inhaltv.get(i-1).getBisIdx()!=null && !inhaltv.get(i-1).getBisIdx().equals(inhaltv.get(i).getVonIdx())) {
+                            warning(Logger.ID_12_5_RECHT_EINTRAGUNGSREIHENFOLGE,gbdbsRechtId,"Recht Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsRechtId);
+                        }else if(inhaltv.get(i-1).getBisIdx()==null && inhaltv.get(i).getVonIdx()!=null) {
+                            warning(Logger.ID_12_5_RECHT_EINTRAGUNGSREIHENFOLGE,gbdbsRechtId,"Recht Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsRechtId);
+                        }else {
+                            // all equal; ok
+                        }
+                    }
+                }
+            }
+            if(gsEle.getValue() instanceof ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_1.GrundpfandrechtType) {
+                ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_1.GrundpfandrechtType gp=(ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_1.GrundpfandrechtType)gsEle.getValue();
+                for(ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_1.VerpfaendetesGrundstueckGrundpfandrechtType gs:gp.getVerpfaendetesGrundstueckGrundpfandrecht()){
+                    int bisNull=0;
+                    int vonNull=0;
+                    List<ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_1.InhaltVerpfaendetesGrundstueckGrundpfandrechtType> inhaltv=new ArrayList<ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_1.InhaltVerpfaendetesGrundstueckGrundpfandrechtType>(); 
+                    for(ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_1.InhaltVerpfaendetesGrundstueckGrundpfandrechtType inhalt:gs.getInhaltVerpfaendetesGrundstueckGrundpfandrecht()){
+                        inhaltv.add(inhalt);
+                        XMLGregorianCalendar von = inhalt.getVonTagebuchDatumZeit();
+                        XMLGregorianCalendar bis = inhalt.getBisTagebuchDatumZeit();
+                        if(bis==null){
+                            bisNull++;
+                        }
+                        if(von==null){
+                            vonNull++;
+                        }
+                    }
+                    if(vonNull>0) {
+                        error(Logger.ID_14_2_VERPFAENDETESGRUNDSTUECKGRUNDPFANDRECHT_OHNE_VON,gbdbsRechtId,"InhaltVerpfaendetesGrundstueckGrundpfandrecht ohne von/Eintragungsdatum "+gbdbsRechtId);
+                    }
+                    if(bisNull>1) {
+                        error(Logger.ID_14_3_VERPFAENDETESGRUNDSTUECKGRUNDPFANDRECHT_MEHRERE_OHNE_BIS,gbdbsRechtId,"InhaltVerpfaendetesGrundstueckGrundpfandrecht ohne bis/Streichungsdatum "+gbdbsRechtId);
+                    }
+                    if(vonNull==0 && bisNull==1) {
+                        // Reihenfolge validieren
+                        // gem. von sortieren
+                        inhaltv.sort(new Comparator<ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_1.InhaltVerpfaendetesGrundstueckGrundpfandrechtType>() {
+                            @Override
+                            public int compare(ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_1.InhaltVerpfaendetesGrundstueckGrundpfandrechtType o1,
+                                    ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_1.InhaltVerpfaendetesGrundstueckGrundpfandrechtType o2) {
+                                XMLGregorianCalendar von1 = o1.getVonTagebuchDatumZeit();
+                                XMLGregorianCalendar von2 = o2.getVonTagebuchDatumZeit();
+                                return GbdbsValidator.compare(von1, von2);
+                            }
+                            
+                        });
+                        // bis[i]==von[i+1] validieren
+                        for(int i=1;i<inhaltv.size();i++) {
+                            if(inhaltv.get(i-1).getBisEGBTBID()!=null  && !inhaltv.get(i-1).getBisEGBTBID().equals(inhaltv.get(i).getVonEGBTBID())) {
+                                warning(Logger.ID_14_4_VERPFAENDETESGRUNDSTUECKGRUNDPFANDRECHT_EINTRAGUNGSREIHENFOLGE,gbdbsRechtId,"VerpfaendetesGrundstueckGrundpfandrecht Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsRechtId);
+                            }else if(inhaltv.get(i-1).getBisEGBTBID()==null  && inhaltv.get(i).getVonEGBTBID()!=null) {
+                                warning(Logger.ID_14_4_VERPFAENDETESGRUNDSTUECKGRUNDPFANDRECHT_EINTRAGUNGSREIHENFOLGE,gbdbsRechtId,"VerpfaendetesGrundstueckGrundpfandrecht Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsRechtId);
+                            }else if(inhaltv.get(i-1).getBisTagebuchNummer()!=null && !inhaltv.get(i-1).getBisTagebuchNummer().equals(inhaltv.get(i).getVonTagebuchNummer())) {
+                                warning(Logger.ID_14_4_VERPFAENDETESGRUNDSTUECKGRUNDPFANDRECHT_EINTRAGUNGSREIHENFOLGE,gbdbsRechtId,"VerpfaendetesGrundstueckGrundpfandrecht Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsRechtId);
+                            }else if(inhaltv.get(i-1).getBisTagebuchNummer()==null && inhaltv.get(i).getVonTagebuchNummer()!=null) {
+                                warning(Logger.ID_14_4_VERPFAENDETESGRUNDSTUECKGRUNDPFANDRECHT_EINTRAGUNGSREIHENFOLGE,gbdbsRechtId,"VerpfaendetesGrundstueckGrundpfandrecht Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsRechtId);
+                            }else if(inhaltv.get(i-1).getBisTagebuchDatumZeit()!=null && !inhaltv.get(i-1).getBisTagebuchDatumZeit().equals(inhaltv.get(i).getVonTagebuchDatumZeit())) {
+                                warning(Logger.ID_14_4_VERPFAENDETESGRUNDSTUECKGRUNDPFANDRECHT_EINTRAGUNGSREIHENFOLGE,gbdbsRechtId,"VerpfaendetesGrundstueckGrundpfandrecht Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsRechtId);
+                            }else if(inhaltv.get(i-1).getBisTagebuchDatumZeit()==null && inhaltv.get(i).getVonTagebuchDatumZeit()!=null) {
+                                warning(Logger.ID_14_4_VERPFAENDETESGRUNDSTUECKGRUNDPFANDRECHT_EINTRAGUNGSREIHENFOLGE,gbdbsRechtId,"VerpfaendetesGrundstueckGrundpfandrecht Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsRechtId);
+                            }else if(inhaltv.get(i-1).getBisIdx()!=null && !inhaltv.get(i-1).getBisIdx().equals(inhaltv.get(i).getVonIdx())) {
+                                warning(Logger.ID_14_4_VERPFAENDETESGRUNDSTUECKGRUNDPFANDRECHT_EINTRAGUNGSREIHENFOLGE,gbdbsRechtId,"VerpfaendetesGrundstueckGrundpfandrecht Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsRechtId);
+                            }else if(inhaltv.get(i-1).getBisIdx()==null && inhaltv.get(i).getVonIdx()!=null) {
+                                warning(Logger.ID_14_4_VERPFAENDETESGRUNDSTUECKGRUNDPFANDRECHT_EINTRAGUNGSREIHENFOLGE,gbdbsRechtId,"VerpfaendetesGrundstueckGrundpfandrecht Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsRechtId);
+                            }else {
+                                // all equal; ok
+                            }
+                        }
+                    }
+                }
+            }
+        }else if(gsEle.getValue() instanceof ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_0.RechtType){
+            {
+                int bisNull=0;
+                int vonNull=0;
+                List<ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_0.InhaltRechtType> inhaltv=new ArrayList<ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_0.InhaltRechtType>(); 
+                for(JAXBElement<? extends ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_0.InhaltRechtType> inhaltEle:((ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_0.RechtType)gsEle.getValue()).getInhaltRecht()){
+                    ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_0.InhaltRechtType inhalt=(ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_0.InhaltRechtType)inhaltEle.getValue();
+                    inhaltv.add(inhalt);
+                    XMLGregorianCalendar von = inhalt.getBegruendungTagebuchDatumZeit();
+                    XMLGregorianCalendar bis = inhalt.getTagebuchDatumZeit();
+                    if(bis==null){
+                        bisNull++;
+                    }
+                    if(von==null){
+                        vonNull++;
+                    }
+                }
+                if(vonNull>0) {
+                    error(Logger.ID_12_3_RECHT_OHNE_VON,gbdbsRechtId,"InhaltRecht ohne von/Eintragungsdatum "+gbdbsRechtId);
+                }
+                if(bisNull>1) {
+                    error(Logger.ID_12_4_RECHT_MEHRERE_OHNE_BIS,gbdbsRechtId,"mehrere InhaltRecht ohne bis/Streichungsdatum "+gbdbsRechtId);
+                }
+                if(vonNull==0 && bisNull==1) {
+                    // Reihenfolge validieren
+                    // gem. von sortieren
+                    inhaltv.sort(new Comparator<ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_0.InhaltRechtType>() {
+                        @Override
+                        public int compare(ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_0.InhaltRechtType o1,
+                                ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_0.InhaltRechtType o2) {
+                            XMLGregorianCalendar von1 = o1.getBegruendungTagebuchDatumZeit();
+                            XMLGregorianCalendar von2 = o2.getBegruendungTagebuchDatumZeit();
+                            return GbdbsValidator.compare(von1, von2);
+                        }
+                        
+                    });
+                    // bis[i]==von[i+1] validieren
+                    for(int i=1;i<inhaltv.size();i++) {
+                        if(inhaltv.get(i-1).getEGBTBID()!=null  && !inhaltv.get(i-1).getEGBTBID().equals(inhaltv.get(i).getBegruendungEGBTBID())) {
+                            warning(Logger.ID_12_5_RECHT_EINTRAGUNGSREIHENFOLGE,gbdbsRechtId,"Recht Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsRechtId);
+                        }else if(inhaltv.get(i-1).getEGBTBID()==null  && inhaltv.get(i).getBegruendungEGBTBID()!=null) {
+                            warning(Logger.ID_12_5_RECHT_EINTRAGUNGSREIHENFOLGE,gbdbsRechtId,"Recht Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsRechtId);
+                        }else if(inhaltv.get(i-1).getTagebuchNummer()!=null && !inhaltv.get(i-1).getTagebuchNummer().equals(inhaltv.get(i).getBegruendungTagebuchNummer())) {
+                            warning(Logger.ID_12_5_RECHT_EINTRAGUNGSREIHENFOLGE,gbdbsRechtId,"Recht Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsRechtId);
+                        }else if(inhaltv.get(i-1).getTagebuchNummer()==null && inhaltv.get(i).getBegruendungTagebuchNummer()!=null) {
+                            warning(Logger.ID_12_5_RECHT_EINTRAGUNGSREIHENFOLGE,gbdbsRechtId,"Recht Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsRechtId);
+                        }else if(inhaltv.get(i-1).getTagebuchDatumZeit()!=null && !inhaltv.get(i-1).getTagebuchDatumZeit().equals(inhaltv.get(i).getBegruendungTagebuchDatumZeit())) {
+                            warning(Logger.ID_12_5_RECHT_EINTRAGUNGSREIHENFOLGE,gbdbsRechtId,"Recht Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsRechtId);
+                        }else if(inhaltv.get(i-1).getTagebuchDatumZeit()==null && inhaltv.get(i).getBegruendungTagebuchDatumZeit()!=null) {
+                            warning(Logger.ID_12_5_RECHT_EINTRAGUNGSREIHENFOLGE,gbdbsRechtId,"Recht Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsRechtId);
+                        }else if(inhaltv.get(i-1).getIdx()!=null && !inhaltv.get(i-1).getIdx().equals(inhaltv.get(i).getBegruendungIdx())) {
+                            warning(Logger.ID_12_5_RECHT_EINTRAGUNGSREIHENFOLGE,gbdbsRechtId,"Recht Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsRechtId);
+                        }else if(inhaltv.get(i-1).getIdx()==null && inhaltv.get(i).getBegruendungIdx()!=null) {
+                            warning(Logger.ID_12_5_RECHT_EINTRAGUNGSREIHENFOLGE,gbdbsRechtId,"Recht Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsRechtId);
+                        }else {
+                            // all equal; ok
+                        }
+                    }
+                }
+            }
+            if(gsEle.getValue() instanceof ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_0.GrundpfandrechtType) {
+                ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_0.GrundpfandrechtType gp=(ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_0.GrundpfandrechtType)gsEle.getValue();
+                for(ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_0.GrundpfandrechtType.VerpfaendetesGrundstueckGrundpfandrecht gs:gp.getVerpfaendetesGrundstueckGrundpfandrecht()){
+                    int bisNull=0;
+                    int vonNull=0;
+                    List<ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_0.InhaltVerpfaendetesGrundstueckGrundpfandrechtType> inhaltv=new ArrayList<ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_0.InhaltVerpfaendetesGrundstueckGrundpfandrechtType>(); 
+                    for(ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_0.InhaltVerpfaendetesGrundstueckGrundpfandrechtType inhalt:gs.getVerpfaendetesGrundstueckGrundpfandrecht().getInhaltVerpfaendetesGrundstueckGrundpfandrecht()){
+                        inhaltv.add(inhalt);
+                        XMLGregorianCalendar von = inhalt.getBegruendungTagebuchDatumZeit();
+                        XMLGregorianCalendar bis = inhalt.getTagebuchDatumZeit();
+                        if(bis==null){
+                            bisNull++;
+                        }
+                        if(von==null){
+                            vonNull++;
+                        }
+                    }
+                    if(vonNull>0) {
+                        error(Logger.ID_14_2_VERPFAENDETESGRUNDSTUECKGRUNDPFANDRECHT_OHNE_VON,gbdbsRechtId,"InhaltVerpfaendetesGrundstueckGrundpfandrecht ohne von/Eintragungsdatum "+gbdbsRechtId);
+                    }
+                    if(bisNull>1) {
+                        error(Logger.ID_14_3_VERPFAENDETESGRUNDSTUECKGRUNDPFANDRECHT_MEHRERE_OHNE_BIS,gbdbsRechtId,"InhaltVerpfaendetesGrundstueckGrundpfandrecht ohne bis/Streichungsdatum "+gbdbsRechtId);
+                    }
+                    if(vonNull==0 && bisNull==1) {
+                        // Reihenfolge validieren
+                        // gem. von sortieren
+                        inhaltv.sort(new Comparator<ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_0.InhaltVerpfaendetesGrundstueckGrundpfandrechtType>() {
+                            @Override
+                            public int compare(ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_0.InhaltVerpfaendetesGrundstueckGrundpfandrechtType o1,
+                                    ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_0.InhaltVerpfaendetesGrundstueckGrundpfandrechtType o2) {
+                                XMLGregorianCalendar von1 = o1.getBegruendungTagebuchDatumZeit();
+                                XMLGregorianCalendar von2 = o2.getBegruendungTagebuchDatumZeit();
+                                return GbdbsValidator.compare(von1, von2);
+                            }
+                            
+                        });
+                        // bis[i]==von[i+1] validieren
+                        for(int i=1;i<inhaltv.size();i++) {
+                            if(inhaltv.get(i-1).getEGBTBID()!=null  && !inhaltv.get(i-1).getEGBTBID().equals(inhaltv.get(i).getBegruendungEGBTBID())) {
+                                warning(Logger.ID_14_4_VERPFAENDETESGRUNDSTUECKGRUNDPFANDRECHT_EINTRAGUNGSREIHENFOLGE,gbdbsRechtId,"VerpfaendetesGrundstueckGrundpfandrecht Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsRechtId);
+                            }else if(inhaltv.get(i-1).getEGBTBID()==null  && inhaltv.get(i).getBegruendungEGBTBID()!=null) {
+                                warning(Logger.ID_14_4_VERPFAENDETESGRUNDSTUECKGRUNDPFANDRECHT_EINTRAGUNGSREIHENFOLGE,gbdbsRechtId,"VerpfaendetesGrundstueckGrundpfandrecht Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsRechtId);
+                            }else if(inhaltv.get(i-1).getTagebuchNummer()!=null && !inhaltv.get(i-1).getTagebuchNummer().equals(inhaltv.get(i).getBegruendungTagebuchNummer())) {
+                                warning(Logger.ID_14_4_VERPFAENDETESGRUNDSTUECKGRUNDPFANDRECHT_EINTRAGUNGSREIHENFOLGE,gbdbsRechtId,"VerpfaendetesGrundstueckGrundpfandrecht Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsRechtId);
+                            }else if(inhaltv.get(i-1).getTagebuchNummer()==null && inhaltv.get(i).getBegruendungTagebuchNummer()!=null) {
+                                warning(Logger.ID_14_4_VERPFAENDETESGRUNDSTUECKGRUNDPFANDRECHT_EINTRAGUNGSREIHENFOLGE,gbdbsRechtId,"VerpfaendetesGrundstueckGrundpfandrecht Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsRechtId);
+                            }else if(inhaltv.get(i-1).getTagebuchDatumZeit()!=null && !inhaltv.get(i-1).getTagebuchDatumZeit().equals(inhaltv.get(i).getBegruendungTagebuchDatumZeit())) {
+                                warning(Logger.ID_14_4_VERPFAENDETESGRUNDSTUECKGRUNDPFANDRECHT_EINTRAGUNGSREIHENFOLGE,gbdbsRechtId,"VerpfaendetesGrundstueckGrundpfandrecht Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsRechtId);
+                            }else if(inhaltv.get(i-1).getTagebuchDatumZeit()==null && inhaltv.get(i).getBegruendungTagebuchDatumZeit()!=null) {
+                                warning(Logger.ID_14_4_VERPFAENDETESGRUNDSTUECKGRUNDPFANDRECHT_EINTRAGUNGSREIHENFOLGE,gbdbsRechtId,"VerpfaendetesGrundstueckGrundpfandrecht Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsRechtId);
+                            }else if(inhaltv.get(i-1).getIdx()!=null && !inhaltv.get(i-1).getIdx().equals(inhaltv.get(i).getBegruendungIdx())) {
+                                warning(Logger.ID_14_4_VERPFAENDETESGRUNDSTUECKGRUNDPFANDRECHT_EINTRAGUNGSREIHENFOLGE,gbdbsRechtId,"VerpfaendetesGrundstueckGrundpfandrecht Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsRechtId);
+                            }else if(inhaltv.get(i-1).getIdx()==null && inhaltv.get(i).getBegruendungIdx()!=null) {
+                                warning(Logger.ID_14_4_VERPFAENDETESGRUNDSTUECKGRUNDPFANDRECHT_EINTRAGUNGSREIHENFOLGE,gbdbsRechtId,"VerpfaendetesGrundstueckGrundpfandrecht Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsRechtId);
+                            }else {
+                                // all equal; ok
+                            }
+                        }
+                    }
+                }
+            }
+        }else {
+            throw new IllegalArgumentException("unexpected RechtType"+gsEle.getValue().getClass());
+        }
+    }
+    private void validateInhaltPersonGBVonBis(String gbdbsPersId,JAXBElement persEle) {
+        if(persEle.getValue() instanceof ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_1.PersonGBType) {
+            int bisNull=0;
+            int vonNull=0;
+            List<ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_1.InhaltPersonGBType> inhaltv=new ArrayList<ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_1.InhaltPersonGBType>(); 
+            for(JAXBElement<? extends ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_1.InhaltPersonGBType> inhaltEle:((ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_1.PersonGBType)persEle.getValue()).getInhaltPersonGB()){
+                ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_1.InhaltPersonGBType inhalt=(ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_1.InhaltPersonGBType)inhaltEle.getValue();
+                inhaltv.add(inhalt);
+                XMLGregorianCalendar von = inhalt.getVonTagebuchDatumZeit();
+                XMLGregorianCalendar bis = inhalt.getBisTagebuchDatumZeit();
+                if(bis==null){
+                    bisNull++;
+                }
+                if(von==null){
+                    vonNull++;
+                }
+            }
+            if(vonNull>0) {
+                error(Logger.ID_3_3_PERSON_OHNE_VON,gbdbsPersId,"InhaltPersonGB ohne von/Eintragungsdatum "+gbdbsPersId);
+            }
+            if(bisNull>1) {
+                error(Logger.ID_3_4_PERSON_MEHRERE_OHNE_BIS,gbdbsPersId,"mehrere InhaltPersonGB ohne bis/Streichungsdatum "+gbdbsPersId);
+            }
+            if(vonNull==0 && bisNull==1) {
+                // Reihenfolge validieren
+                // gem. von sortieren
+                inhaltv.sort(new Comparator<ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_1.InhaltPersonGBType>() {
+                    @Override
+                    public int compare(ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_1.InhaltPersonGBType o1,
+                            ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_1.InhaltPersonGBType o2) {
+                        XMLGregorianCalendar von1 = o1.getVonTagebuchDatumZeit();
+                        XMLGregorianCalendar von2 = o2.getVonTagebuchDatumZeit();
+                        return GbdbsValidator.compare(von1, von2);
+                    }
+                    
+                });
+                // bis[i]==von[i+1] validieren
+                for(int i=1;i<inhaltv.size();i++) {
+                    if(inhaltv.get(i-1).getBisEGBTBID()!=null  && !inhaltv.get(i-1).getBisEGBTBID().equals(inhaltv.get(i).getVonEGBTBID())) {
+                        warning(Logger.ID_3_5_PERSON_EINTRAGUNGSREIHENFOLGE,gbdbsPersId,"Person Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsPersId);
+                    }else if(inhaltv.get(i-1).getBisEGBTBID()==null  && inhaltv.get(i).getVonEGBTBID()!=null) {
+                        warning(Logger.ID_3_5_PERSON_EINTRAGUNGSREIHENFOLGE,gbdbsPersId,"Person Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsPersId);
+                    }else if(inhaltv.get(i-1).getBisTagebuchNummer()!=null && !inhaltv.get(i-1).getBisTagebuchNummer().equals(inhaltv.get(i).getVonTagebuchNummer())) {
+                        warning(Logger.ID_3_5_PERSON_EINTRAGUNGSREIHENFOLGE,gbdbsPersId,"Person Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsPersId);
+                    }else if(inhaltv.get(i-1).getBisTagebuchNummer()==null && inhaltv.get(i).getVonTagebuchNummer()!=null) {
+                        warning(Logger.ID_3_5_PERSON_EINTRAGUNGSREIHENFOLGE,gbdbsPersId,"Person Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsPersId);
+                    }else if(inhaltv.get(i-1).getBisTagebuchDatumZeit()!=null && !inhaltv.get(i-1).getBisTagebuchDatumZeit().equals(inhaltv.get(i).getVonTagebuchDatumZeit())) {
+                        warning(Logger.ID_3_5_PERSON_EINTRAGUNGSREIHENFOLGE,gbdbsPersId,"Person Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsPersId);
+                    }else if(inhaltv.get(i-1).getBisTagebuchDatumZeit()==null && inhaltv.get(i).getVonTagebuchDatumZeit()!=null) {
+                        warning(Logger.ID_3_5_PERSON_EINTRAGUNGSREIHENFOLGE,gbdbsPersId,"Person Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsPersId);
+                    }else if(inhaltv.get(i-1).getBisIdx()!=null && !inhaltv.get(i-1).getBisIdx().equals(inhaltv.get(i).getVonIdx())) {
+                        warning(Logger.ID_3_5_PERSON_EINTRAGUNGSREIHENFOLGE,gbdbsPersId,"Person Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsPersId);
+                    }else if(inhaltv.get(i-1).getBisIdx()==null && inhaltv.get(i).getVonIdx()!=null) {
+                        warning(Logger.ID_3_5_PERSON_EINTRAGUNGSREIHENFOLGE,gbdbsPersId,"Person Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsPersId);
+                    }else {
+                        // all equal; ok
+                    }
+                }
+            }
+        }else if(persEle.getValue() instanceof ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_0.PersonGBType){
+            int bisNull=0;
+            int vonNull=0;
+            List<ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_0.InhaltPersonGBType> inhaltv=new ArrayList<ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_0.InhaltPersonGBType>(); 
+            for(JAXBElement<? extends ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_0.InhaltPersonGBType> inhaltEle:((ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_0.PersonGBType)persEle.getValue()).getInhaltPersonGB()){
+                ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_0.InhaltPersonGBType inhalt=(ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_0.InhaltPersonGBType)inhaltEle.getValue();
+                inhaltv.add(inhalt);
+                XMLGregorianCalendar von = inhalt.getBegruendungTagebuchDatumZeit();
+                XMLGregorianCalendar bis = inhalt.getTagebuchDatumZeit();
+                if(bis==null){
+                    bisNull++;
+                }
+                if(von==null){
+                    vonNull++;
+                }
+            }
+            if(vonNull>0) {
+                error(Logger.ID_3_3_PERSON_OHNE_VON,gbdbsPersId,"InhaltPersonGB ohne von/Eintragungsdatum "+gbdbsPersId);
+            }
+            if(bisNull>1) {
+                error(Logger.ID_3_4_PERSON_MEHRERE_OHNE_BIS,gbdbsPersId,"mehrere InhaltPersonGB ohne bis/Streichungsdatum "+gbdbsPersId);
+            }
+            if(vonNull==0 && bisNull==1) {
+                // Reihenfolge validieren
+                // gem. von sortieren
+                inhaltv.sort(new Comparator<ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_0.InhaltPersonGBType>() {
+                    @Override
+                    public int compare(ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_0.InhaltPersonGBType o1,
+                            ch.ehi.gbdbsvalidator.jaxb.gbbasistypen._2_0.InhaltPersonGBType o2) {
+                        XMLGregorianCalendar von1 = o1.getBegruendungTagebuchDatumZeit();
+                        XMLGregorianCalendar von2 = o2.getBegruendungTagebuchDatumZeit();
+                        return GbdbsValidator.compare(von1, von2);
+                    }
+                    
+                });
+                // bis[i]==von[i+1] validieren
+                for(int i=1;i<inhaltv.size();i++) {
+                    if(inhaltv.get(i-1).getEGBTBID()!=null  && !inhaltv.get(i-1).getEGBTBID().equals(inhaltv.get(i).getBegruendungEGBTBID())) {
+                        warning(Logger.ID_3_5_PERSON_EINTRAGUNGSREIHENFOLGE,gbdbsPersId,"Person Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsPersId);
+                    }else if(inhaltv.get(i-1).getEGBTBID()==null  && inhaltv.get(i).getBegruendungEGBTBID()!=null) {
+                        warning(Logger.ID_3_5_PERSON_EINTRAGUNGSREIHENFOLGE,gbdbsPersId,"Person Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsPersId);
+                    }else if(inhaltv.get(i-1).getTagebuchNummer()!=null && !inhaltv.get(i-1).getTagebuchNummer().equals(inhaltv.get(i).getBegruendungTagebuchNummer())) {
+                        warning(Logger.ID_3_5_PERSON_EINTRAGUNGSREIHENFOLGE,gbdbsPersId,"Person Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsPersId);
+                    }else if(inhaltv.get(i-1).getTagebuchNummer()==null && inhaltv.get(i).getBegruendungTagebuchNummer()!=null) {
+                        warning(Logger.ID_3_5_PERSON_EINTRAGUNGSREIHENFOLGE,gbdbsPersId,"Person Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsPersId);
+                    }else if(inhaltv.get(i-1).getTagebuchDatumZeit()!=null && !inhaltv.get(i-1).getTagebuchDatumZeit().equals(inhaltv.get(i).getBegruendungTagebuchDatumZeit())) {
+                        warning(Logger.ID_3_5_PERSON_EINTRAGUNGSREIHENFOLGE,gbdbsPersId,"Person Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsPersId);
+                    }else if(inhaltv.get(i-1).getTagebuchDatumZeit()==null && inhaltv.get(i).getBegruendungTagebuchDatumZeit()!=null) {
+                        warning(Logger.ID_3_5_PERSON_EINTRAGUNGSREIHENFOLGE,gbdbsPersId,"Person Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsPersId);
+                    }else if(inhaltv.get(i-1).getIdx()!=null && !inhaltv.get(i-1).getIdx().equals(inhaltv.get(i).getBegruendungIdx())) {
+                        warning(Logger.ID_3_5_PERSON_EINTRAGUNGSREIHENFOLGE,gbdbsPersId,"Person Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsPersId);
+                    }else if(inhaltv.get(i-1).getIdx()==null && inhaltv.get(i).getBegruendungIdx()!=null) {
+                        warning(Logger.ID_3_5_PERSON_EINTRAGUNGSREIHENFOLGE,gbdbsPersId,"Person Eintragungsreihenfolge fehlerhaft (bis[i]!=von[i+1]) "+gbdbsPersId);
+                    }else {
+                        // all equal; ok
+                    }
+                }
+            }
+        }else {
+            throw new IllegalArgumentException("unexpected PersonGBType"+persEle.getValue().getClass());
+        }
+    }
+
     private static boolean dateInRange(XMLGregorianCalendar von, int jahr) {
         return von.toGregorianCalendar().after(new GregorianCalendar(jahr-1,11,31)) && von.toGregorianCalendar().before(new GregorianCalendar(jahr+1,0,1));
+    }
+
+    public static int compare(XMLGregorianCalendar von1, XMLGregorianCalendar von2) {
+        if(von1.equals(von2)) {
+            return 0;
+        }
+        if(von1.compare(von2)==DatatypeConstants.INDETERMINATE) {
+            return -1;
+        }
+        return von1.compare(von2)==DatatypeConstants.GREATER?1:-1;
     }
 
 }

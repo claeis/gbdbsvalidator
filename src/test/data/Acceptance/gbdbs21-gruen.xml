@@ -8,7 +8,7 @@ xmlns:ns34="http://schemas.geo.admin.ch/BJ/TGBV/GBDBS-Datei/2.1" >
 		<ns20:Liegenschaft>
 			<ns20:Nummer>CH887722167773:11::test:</ns20:Nummer>
 			<ns20:istKopie>false</ns20:istKopie>
-			<ns20:InhaltLiegenschaft>
+			<ns20:InhaltLiegenschaft vonEGBTBID="CH97831229777" vonTagebuchNummer="lt.Katg" vonTagebuchDatumZeit="1919-07-01T00:00:01" vonIdx="1">
 				<ns20:Flaechenmass>999</ns20:Flaechenmass>
 			</ns20:InhaltLiegenschaft>
 			<ns20:Flurname>
@@ -36,7 +36,7 @@ xmlns:ns34="http://schemas.geo.admin.ch/BJ/TGBV/GBDBS-Datei/2.1" >
 		</ns20:Liegenschaft>
 		<ns20:NatuerlichePersonGB>
 			<ns20:Nummer>CH792277771621::::</ns20:Nummer>
-			<ns20:InhaltNatuerlichePersonGB>
+			<ns20:InhaltNatuerlichePersonGB vonEGBTBID="CH97831229777" vonTagebuchNummer="lt.Katg" vonTagebuchDatumZeit="1919-07-01T00:00:01" vonIdx="1">
 				<ns20:Name>Müller</ns20:Name>
 				<ns20:Vornamen>Ulrich Walter</ns20:Vornamen>
 				<ns20:Geburtsjahr>1949</ns20:Geburtsjahr>

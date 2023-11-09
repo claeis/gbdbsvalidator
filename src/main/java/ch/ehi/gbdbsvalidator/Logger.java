@@ -57,6 +57,9 @@ public class Logger {
     public static final String ID_2_13_ANTEIL_SUMME_DER_EIGENTUMSANTEILE_NICHT_1="2.13";    
     public static final String ID_3_1_PERSON_OHNE_INHALT = "3.1";
     public static final String ID_3_2_KEINE_PERSONEN = "3.2";
+    public static final String ID_3_3_PERSON_OHNE_VON = "3.3";
+    public static final String ID_3_4_PERSON_MEHRERE_OHNE_BIS = "3.4";
+    public static final String ID_3_5_PERSON_EINTRAGUNGSREIHENFOLGE="3.5";
     public static final String ID_4_1_ANTEIL_DER_JURISTISCHEN_PERSONEN_MIT_UID = "4.1";
     public static final String ID_4_2_ANZAHL_JURISTISCHEPERSONEN = "4.2";
     public static final String ID_5_1_ANTEIL_DER_NATUERLICHEN_PERSONEN_MIT_AHVN13 = "5.1";
@@ -66,6 +69,9 @@ public class Logger {
     public static final String ID_6_3_MITGLIED_OHNE_VON_BIS = "6.3";
     public static final String ID_7_1_KEINE_GRUNDSTUECKE = "7.1";
     public static final String ID_7_2_ABSTRAKTES_GRUNDSTUECK_OHNE_ISTKOPIE = "7.2";
+    public static final String ID_7_3_GRUNDSTUECK_OHNE_VON = "7.3";
+    public static final String ID_7_4_GRUNDSTUECK_MEHRERE_OHNE_BIS = "7.4";
+    public static final String ID_7_5_GRUNDSTUECK_EINTRAGUNGSREIHENFOLGE="7.5";
     public static final String ID_8_1_ANZAHL_LIEGENSCHAFTEN = "8.1";
     public static final String ID_9_1_ANZAHL_MITEIGENTUMSANTEILE = "9.1";
     public static final String ID_9_2_STWE_OHNE_BESCHREIBUNG = "9.2";
@@ -74,10 +80,16 @@ public class Logger {
     public static final String ID_11_1_ANZAHL_BERGWERKE = "11.1";
     public static final String ID_12_1_KEINE_RECHTE = "12.1";
     public static final String ID_12_2_INHALT_BEI_RECHT_OHNE_VON_BIS = "12.2";
+    public static final String ID_12_3_RECHT_OHNE_VON = "12.3";
+    public static final String ID_12_4_RECHT_MEHRERE_OHNE_BIS = "12.4";
+    public static final String ID_12_5_RECHT_EINTRAGUNGSREIHENFOLGE="12.5";
     public static final String ID_13_1_DIENSTBARKEIT_OHNE_ISTVERSELBSTAENDIGT = "13.1";
     public static final String ID_13_2_LASTRECHT_BEI_DIENSTBARKEIT_BERECHTIGTE_OHNE_VON_BIS = "13.2";
     public static final String ID_13_3_ANZAHL_DIENSTBARKEIT = "13.3";
     public static final String ID_14_1_ANZAHL_GRUNDPFANDRECHT = "14.1";
+    public static final String ID_14_2_VERPFAENDETESGRUNDSTUECKGRUNDPFANDRECHT_OHNE_VON = "14.2";
+    public static final String ID_14_3_VERPFAENDETESGRUNDSTUECKGRUNDPFANDRECHT_MEHRERE_OHNE_BIS = "14.3";
+    public static final String ID_14_4_VERPFAENDETESGRUNDSTUECKGRUNDPFANDRECHT_EINTRAGUNGSREIHENFOLGE="14.4";
     public static final String ID_15_1_ANZAHL_ANMERKUNG = "15.1";
     public static final String ID_15_2_KEINE_ANMERKUNGEN = "15.2";
     public static final String ID_15_3_ANTEIL_ANMERKUNG_OHNE_IST_OEFFENTLICH = "15.3";
@@ -215,6 +227,9 @@ public class Logger {
     }
     public void logRot(String id,String msg) {
         logMessage(id,Status.rot.name(),null,msg);
+    }
+    public void logRot(String id,String key,String msg) {
+        logMessage(id,Status.rot.name(),key,msg);
     }
     public void logGelb(String id,String key,String msg) {
         logMessage(id,Status.gelb.name(),key,msg);
