@@ -96,6 +96,7 @@ public class Logger {
     public static final String ID_15_4_ANTEIL_OEFFENTLICHE_ANMERKUNGEN = "15.4";
     public static final String ID_16_1_ANZAHL_GRUNDLAST = "16.1";
     public static final String ID_17_1_ANZAHL_VORMERKUNG = "17.1";
+    public static final String ID_18_1_KEINE_HAENGIGEN_GESCHAEFTE = "18.1";
     
     private LogListener listener=null;
         
