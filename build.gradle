@@ -35,10 +35,11 @@ compileJava.options.encoding = 'US-ASCII'
 dependencies {
 
     compile group: 'ch.ehi', name: 'ehibasics', version: '1.4.1'
-	compile	group: 'javax.xml.bind',name:'jaxb-api', version:'2.3.0'
-	compile	group: 'com.sun.xml.bind',name:'jaxb-core', version:'2.3.0'
-	compile	group: 'com.sun.xml.bind',name:'jaxb-impl', version:'2.3.0'
-	compile group: 'javax.activation', name: 'activation', version: '1.1.1'
+	compile	group: 'javax.xml.bind',name:'jaxb-api', version:'2.3.1'
+	compile 'org.glassfish.jaxb:jaxb-core:2.3.0.1'
+	compile 'org.glassfish.jaxb:jaxb-runtime:2.3.9'
+	compile 'com.sun.activation:jakarta.activation:1.2.2'
+
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.6.1'
     compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.6.1'
     compile group: 'com.h2database', name: 'h2', version: '1.4.200'
@@ -51,8 +52,7 @@ dependencies {
     ftpAntTask "org.apache.ant:ant-commons-net:1.10.7"
     
     jaxb (
-		'com.sun.xml.bind:jaxb-xjc:2.2.7',
-		'com.sun.xml.bind:jaxb-impl:2.2.7'
+    	'org.glassfish.jaxb:jaxb-xjc:2.3.9'
     )
 }
 
@@ -130,7 +130,8 @@ task jaxb {
         ant.xjc(
 			destdir: "$generatedXjcSources",
 			language: 'XMLSCHEMA',
-			extension: true
+			extension: true,
+			encoding: 'US-ASCII'
         ){
             schema(dir: "src/main/xsd", includes: "**/*.xsd")
             binding(dir: "src/main/xjb", includes: "*.xjb")
