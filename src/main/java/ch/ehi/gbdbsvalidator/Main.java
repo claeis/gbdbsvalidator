@@ -193,7 +193,7 @@ public class Main {
 	protected static void printDescription ()
 	{
 	  System.err.println("DESCRIPTION");
-	  System.err.println("  creates simplified, derived Interlis data.");
+	  System.err.println("  validates GBDBS data.");
 	}
 
 	/** Prints program usage.
